@@ -7,7 +7,7 @@ app.register_blueprint(networks_bp)
 
 @app.route('/')
 def index():
-    return 'Hello from Flask!'
+    return networks_bp.networks()
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5000)
