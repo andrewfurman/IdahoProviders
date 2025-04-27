@@ -27,7 +27,7 @@ def create_app():
     # Initialize SQLAlchemy and Migrate
     db = SQLAlchemy(app)
     from flask_migrate import Migrate
-    migrate = Migrate(app, db)
+    migrate = Migrate(app, db, directory='migrations')
     
     return app
 
