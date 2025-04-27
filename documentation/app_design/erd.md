@@ -1,3 +1,5 @@
+FURMAN UPDATE GOT MODELS WORKING
+
 erDiagram
 individual_providers {
     int    provider_id PK
