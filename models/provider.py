@@ -4,20 +4,20 @@ class IndividualProvider(db.Model):
     __tablename__ = 'individual_providers'
 
     provider_id = db.Column(db.Integer, primary_key=True)
-    npi = db.Column(db.String, nullable=False)
-    first_name = db.Column(db.String, nullable=False)
-    last_name = db.Column(db.String, nullable=False)
-    gender = db.Column(db.String)
-    phone = db.Column(db.String)
-    provider_type = db.Column(db.String)
+    npi = db.Column(db.Text, nullable=False)
+    first_name = db.Column(db.Text, nullable=False)
+    last_name = db.Column(db.Text, nullable=False)
+    gender = db.Column(db.Text)
+    phone = db.Column(db.Text)
+    provider_type = db.Column(db.Text)
     accepting_new_patients = db.Column(db.Boolean)
-    specialties = db.Column(db.String)
-    board_certifications = db.Column(db.String)
-    languages = db.Column(db.String)
-    address_line = db.Column(db.String)
-    city = db.Column(db.String)
-    state = db.Column(db.String)
-    zip = db.Column(db.String)
+    specialties = db.Column(db.Text)
+    board_certifications = db.Column(db.Text)
+    languages = db.Column(db.Text)
+    address_line = db.Column(db.Text)
+    city = db.Column(db.Text)
+    state = db.Column(db.Text)
+    zip = db.Column(db.Text)
 
     def to_dict(self):
         """
