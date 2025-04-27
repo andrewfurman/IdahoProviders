@@ -1,13 +1,13 @@
 
-from dataclasses import dataclass
-from typing import List, Optional
+from . import db
 
-@dataclass
-class Hospital:
-    hospital_id: int
-    name: str
-    ccn: str
-    address_line: str
-    city: str
-    state: str
-    zip: str
+class Hospital(db.Model):
+    __tablename__ = 'hospitals'
+    
+    hospital_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    ccn = db.Column(db.String)
+    address_line = db.Column(db.String)
+    city = db.Column(db.String)
+    state = db.Column(db.String)
+    zip = db.Column(db.String)

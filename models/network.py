@@ -1,9 +1,9 @@
 
-from dataclasses import dataclass
-from typing import List, Optional
+from . import db
 
-@dataclass
-class Network:
-    network_id: int
-    code: str
-    name: str
+class Network(db.Model):
+    __tablename__ = 'networks'
+    
+    network_id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, nullable=False)
