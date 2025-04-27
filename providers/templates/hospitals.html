@@ -19,13 +19,13 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for hospital in hospitals %}
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital[0] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ hospital[1] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital[2] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital[3] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital[4] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital[5] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital[6] }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital.hospital_id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ hospital.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital.ccn }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital.address_line }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital.city }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital.state }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ hospital.zip }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
