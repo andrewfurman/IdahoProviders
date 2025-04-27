@@ -1,38 +1,22 @@
 from flask import Blueprint, render_template
-import psycopg2
-import os
+from flask_sqlalchemy import SQLAlchemy
+from models import IndividualProvider, Network, Hospital
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
+db = SQLAlchemy()
 
 @providers_bp.route('/')
 @providers_bp.route('/individual_providers')
 def providers():
-    return render_template('individual_providers.html')
+    providers = db.session.query(IndividualProvider).all()
+    return render_template('individual_providers.html', providers=providers)
 
 @providers_bp.route('/networks')
 def networks():
-    database_url = os.environ['DATABASE_URL']
-    conn = psycopg2.connect(database_url)
-    cur = conn.cursor()
-    
-    cur.execute("SELECT network_id, code, name FROM networks ORDER BY network_id")
-    networks = cur.fetchall()
-    
-    cur.close()
-    conn.close()
-    
+    networks = db.session.query(Network).order_by(Network.network_id).all()
     return render_template('networks.html', networks=networks)
 
 @providers_bp.route('/hospitals')
 def hospitals():
-    database_url = os.environ['DATABASE_URL']
-    conn = psycopg2.connect(database_url)
-    cur = conn.cursor()
-    
-    cur.execute("SELECT hospital_id, name, ccn, address_line, city, state, zip FROM hospitals ORDER BY hospital_id")
-    hospitals = cur.fetchall()
-    
-    cur.close()
-    conn.close()
-    
+    hospitals = db.session.query(Hospital).order_by(Hospital.hospital_id).all()
     return render_template('hospitals.html', hospitals=hospitals)
