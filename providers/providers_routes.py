@@ -8,7 +8,7 @@ def provider_detail(provider_id):
     provider = db.session.query(IndividualProvider).get(provider_id)
     if provider is None:
         abort(404)
-    return render_template('provider_detail.html', provider=provider)
+    return render_template('individual_provider_detail.html', provider=provider)
 
 @providers_bp.route('/medical_groups')
 def medical_groups():
