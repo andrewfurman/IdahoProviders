@@ -1,44 +1,25 @@
+from . import db
 
-from dataclasses import dataclass
-from typing import List, Optional
+class IndividualProvider(db.Model):
+    __tablename__ = 'individual_providers'
 
-@dataclass
-class IndividualProvider:
-    provider_id: int
-    npi: str
-    first_name: str
-    last_name: str
-    gender: str
-    phone: str
-    provider_type: str
-    accepting_new_patients: bool
-    specialties: str
-    board_certifications: str
-    languages: str
-    address_line: str
-    city: str
-    state: str
-    zip: str
+    provider_id = db.Column(db.Integer, primary_key=True)
+    npi = db.Column(db.String, nullable=False)
+    first_name = db.Column(db.String, nullable=False)
+    last_name = db.Column(db.String, nullable=False)
+    gender = db.Column(db.String)
+    phone = db.Column(db.String)
+    provider_type = db.Column(db.String)
+    accepting_new_patients = db.Column(db.Boolean)
+    specialties = db.Column(db.String)
+    board_certifications = db.Column(db.String)
+    languages = db.Column(db.String)
+    address_line = db.Column(db.String)
+    city = db.Column(db.String)
+    state = db.Column(db.String)
+    zip = db.Column(db.String)
 
-    @staticmethod
-    def get_all_providers() -> List['IndividualProvider']:
-        """
-        Get all providers from the database
-        Returns a list of IndividualProvider objects
-        """
-        # Placeholder for database implementation
-        return []
-
-    @staticmethod
-    def get_provider_by_id(provider_id: int) -> Optional['IndividualProvider']:
-        """
-        Get a specific provider by ID
-        Returns a IndividualProvider object or None if not found
-        """
-        # Placeholder for database implementation
-        return None
-
-    def to_dict(self) -> dict:
+    def to_dict(self):
         """
         Convert IndividualProvider object to dictionary
         Useful for JSON serialization
