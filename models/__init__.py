@@ -1,4 +1,5 @@
 
+from .db import db
 from .provider import IndividualProvider
 from .medical_group import MedicalGroup
 from .hospital import Hospital
@@ -9,6 +10,7 @@ from .REL_hospital_network import HospitalNetwork
 from .REL_group_network import GroupNetwork
 
 __all__ = [
+    'db',
     'IndividualProvider',
     'MedicalGroup', 
     'Hospital',

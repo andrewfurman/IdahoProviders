@@ -1,4 +1,4 @@
-from . import db
+from .db import db
 
 class IndividualProvider(db.Model):
     __tablename__ = 'individual_providers'

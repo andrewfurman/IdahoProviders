@@ -1,9 +1,7 @@
 from flask import Blueprint, render_template
-from flask_sqlalchemy import SQLAlchemy
-from models import IndividualProvider, Network, Hospital
+from models import db, IndividualProvider, Network, Hospital
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
-db = SQLAlchemy()
 
 @providers_bp.route('/')
 @providers_bp.route('/individual_providers')
