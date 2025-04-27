@@ -23,6 +23,11 @@ def create_app():
         
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    # Initialize SQLAlchemy and Migrate
+    db = SQLAlchemy(app)
+    from flask_migrate import Migrate
+    migrate = Migrate(app, db)
     
     return app
 
