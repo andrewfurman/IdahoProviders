@@ -1,0 +1,163 @@
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2704, in all
+2025-04-27 14:32:26.87
+71a80728
+User
+return self._iter().all() # type: ignore
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2858, in _iter
+2025-04-27 14:32:26.87
+71a80728
+User
+result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+2025-04-27 14:32:26.87
+71a80728
+User
+return self._execute_internal(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+2025-04-27 14:32:26.87
+71a80728
+User
+result: Result[Any] = compile_state_cls.orm_execute_statement(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+2025-04-27 14:32:26.87
+71a80728
+User
+result = conn.execute(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
+2025-04-27 14:32:26.87
+71a80728
+User
+return meth(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
+2025-04-27 14:32:26.87
+71a80728
+User
+return connection._execute_clauseelement(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1638, in _execute_clauseelement
+2025-04-27 14:32:26.87
+71a80728
+User
+ret = self._execute_context(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1843, in _execute_context
+2025-04-27 14:32:26.87
+71a80728
+User
+return self._exec_single_context(
+2025-04-27 14:32:26.87
+71a80728
+User
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1983, in _exec_single_context
+2025-04-27 14:32:26.87
+71a80728
+User
+self._handle_dbapi_exception(
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2352, in _handle_dbapi_exception
+2025-04-27 14:32:26.87
+71a80728
+User
+raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1964, in _exec_single_context
+2025-04-27 14:32:26.87
+71a80728
+User
+self.dialect.do_execute(
+2025-04-27 14:32:26.87
+71a80728
+User
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 945, in do_execute
+2025-04-27 14:32:26.87
+71a80728
+User
+cursor.execute(statement, parameters)
+2025-04-27 14:32:26.87
+71a80728
+User
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) SSL connection has been closed unexpectedly
+2025-04-27 14:32:26.87
+71a80728
+User
+2025-04-27 14:32:26.87
+71a80728
+User
+[SQL: SELECT individual_providers.provider_id AS individual_providers_provider_id, individual_providers.npi AS individual_providers_npi, individual_providers.first_name AS individual_providers_first_name, individual_providers.last_name AS individual_providers_last_name, individual_providers.gender AS individual_providers_gender, individual_providers.phone AS individual_providers_phone, individual_providers.provider_type AS individual_providers_provider_type, individual_providers.accepting_new_patients AS individual_providers_accepting_new_patients, individual_providers.specialties AS individual_providers_specialties, individual_providers.board_certifications AS individual_providers_board_certifications, individual_providers.languages AS individual_providers_languages, individual_providers.address_line AS individual_providers_address_line, individual_providers.city AS individual_providers_city, individual_providers.state AS individual_providers_state, individual_providers.zip AS individual_providers_zip
+2025-04-27 14:32:26.87
+71a80728
+User
+FROM individual_providers]
+2025-04-27 14:32:26.87
+71a80728
+User
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
