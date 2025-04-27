@@ -21,13 +21,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 def get_url():
-    return "postgresql://{user}:{pw}@{host}:{port}/{db}".format(
-        user=os.getenv("DB_USER"),
-        pw=os.getenv("DB_PASS"),
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        db=os.getenv("DB_NAME")
-    )
+    return os.getenv("DATABASE_URL")
 
 def run_migrations_offline() -> None:
     url = get_url()
