@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, abort
-from models import db, IndividualProvider, Network, Hospital, MedicalGroup
+from models import db, IndividualProvider, Network, Hospital, MedicalGroup, ProviderGroup
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
 
