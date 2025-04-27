@@ -1,7 +1,12 @@
 from flask import Blueprint, render_template
-from models import db, IndividualProvider, Network, Hospital
+from models import db, IndividualProvider, Network, Hospital, MedicalGroup
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
+
+@providers_bp.route('/medical_groups')
+def medical_groups():
+    groups = db.session.query(MedicalGroup).order_by(MedicalGroup.group_id).all()
+    return render_template('medical_groups.html', medical_groups=groups)
 
 @providers_bp.route('/')
 @providers_bp.route('/individual_providers')
