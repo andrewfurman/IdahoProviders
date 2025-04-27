@@ -1,5 +1,5 @@
 
-from .provider import Provider
+from .provider import IndividualProvider
 from .medical_group import MedicalGroup
 from .hospital import Hospital
 from .network import Network
