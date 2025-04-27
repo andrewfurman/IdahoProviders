@@ -15,9 +15,9 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for network in networks %}
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ network[0] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ network[1] }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ network[2] }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ network.network_id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ network.code }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ network.name }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
