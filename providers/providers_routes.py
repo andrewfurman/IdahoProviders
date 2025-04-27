@@ -4,7 +4,8 @@ import os
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
 
-@providers_bp.route('/providers')
+@providers_bp.route('/')
+@providers_bp.route('/individual_providers')
 def providers():
     return render_template('individual_providers.html')
 
