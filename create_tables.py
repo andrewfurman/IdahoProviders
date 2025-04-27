@@ -1,0 +1,122 @@
+
+import os
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+def create_tables():
+    database_url = os.environ['DATABASE_URL']
+    
+    conn = psycopg2.connect(database_url)
+    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    cur = conn.cursor()
+    
+    try:
+        # Create core tables
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS individual_providers (
+                provider_id SERIAL PRIMARY KEY,
+                npi TEXT NOT NULL,
+                first_name TEXT NOT NULL,
+                last_name TEXT NOT NULL,
+                gender TEXT,
+                phone TEXT,
+                provider_type TEXT,
+                accepting_new_patients BOOLEAN,
+                specialties TEXT,
+                board_certifications TEXT,
+                languages TEXT,
+                address_line TEXT,
+                city TEXT,
+                state TEXT,
+                zip TEXT
+            )
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS medical_groups (
+                group_id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                tax_id TEXT,
+                address_line TEXT,
+                city TEXT,
+                state TEXT,
+                zip TEXT
+            )
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hospitals (
+                hospital_id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                ccn TEXT,
+                address_line TEXT,
+                city TEXT,
+                state TEXT,
+                zip TEXT
+            )
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS networks (
+                network_id SERIAL PRIMARY KEY,
+                code TEXT NOT NULL,
+                name TEXT NOT NULL
+            )
+        """)
+        
+        # Create relationship tables
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS individual_provider_medical_group (
+                id SERIAL PRIMARY KEY,
+                provider_id INTEGER REFERENCES individual_providers(provider_id),
+                group_id INTEGER REFERENCES medical_groups(group_id),
+                start_date DATE,
+                end_date DATE,
+                primary_flag BOOLEAN,
+                UNIQUE(provider_id, group_id)
+            )
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS medical_group_hospital (
+                id SERIAL PRIMARY KEY,
+                group_id INTEGER REFERENCES medical_groups(group_id),
+                hospital_id INTEGER REFERENCES hospitals(hospital_id),
+                privilege_type TEXT,
+                UNIQUE(group_id, hospital_id)
+            )
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS hospital_network (
+                id SERIAL PRIMARY KEY,
+                hospital_id INTEGER REFERENCES hospitals(hospital_id),
+                network_id INTEGER REFERENCES networks(network_id),
+                effective_date DATE,
+                status TEXT,
+                UNIQUE(hospital_id, network_id)
+            )
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS medical_group_network (
+                id SERIAL PRIMARY KEY,
+                group_id INTEGER REFERENCES medical_groups(group_id),
+                network_id INTEGER REFERENCES networks(network_id),
+                effective_date DATE,
+                status TEXT,
+                UNIQUE(group_id, network_id)
+            )
+        """)
+        
+        print("All tables created successfully!")
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        
+    finally:
+        cur.close()
+        conn.close()
+
+if __name__ == "__main__":
+    create_tables()
