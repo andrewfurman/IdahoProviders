@@ -1,7 +1,14 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, abort
 from models import db, IndividualProvider, Network, Hospital, MedicalGroup
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
+
+@providers_bp.route('/individual_providers/<int:provider_id>')
+def provider_detail(provider_id):
+    provider = db.session.query(IndividualProvider).get(provider_id)
+    if provider is None:
+        abort(404)
+    return render_template('provider_detail.html', provider=provider)
 
 @providers_bp.route('/medical_groups')
 def medical_groups():
