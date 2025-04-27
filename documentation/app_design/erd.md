@@ -1,58 +1,90 @@
 erDiagram
-provider {
+individual_providers {
     int    provider_id PK
-    char   npi[10]
-    varchar first_name
-    varchar last_name
-    -- other demo fields …
+    text   npi
+    text   first_name
+    text   last_name
+    text   gender
+    text   phone
+    text   provider_type
+    boolean accepting_new_patients
+    text   specialties
+    text   board_certifications
+    text   languages
+    text   address_line
+    text   city
+    text   state
+    text   zip
 }
 
-medical_group {
+medical_groups {
     int    group_id PK
-    varchar name
-    char   tax_id[9]
+    text   name
+    text   tax_id
+    text   address_line
+    text   city
+    text   state
+    text   zip
 }
 
-hospital {
+hospitals {
     int    hospital_id PK
-    varchar name
-    varchar ccn[10]
+    text   name
+    text   ccn
+    text   address_line
+    text   city
+    text   state
+    text   zip
 }
 
-network {
+networks {
     int    network_id PK
-    varchar code
-    varchar name
+    text   code
+    text   name
 }
 
 %% ────── junctions to handle M:N links ──────
-provider_medical_group {
-    int provider_id FK
-    int group_id    FK
-    date start_date
-    date end_date
+individual_provider_medical_group {
+    int    id PK
+    int    provider_id FK
+    int    group_id    FK
+    date   start_date
+    date   end_date
     boolean primary_flag
 }
 
 medical_group_hospital {
-    int group_id    FK
-    int hospital_id FK
-    varchar privilege_type
+    int    id PK
+    int    group_id    FK
+    int    hospital_id FK
+    text   privilege_type
 }
 
 hospital_network {
-    int hospital_id FK
-    int network_id  FK
-    date effective_date
-    varchar status          -- Active, Tier 1, etc.
+    int    id PK
+    int    hospital_id FK
+    int    network_id  FK
+    date   effective_date
+    text   status
+}
+
+medical_group_network {
+    int    id PK
+    int    group_id   FK
+    int    network_id FK
+    date   effective_date
+    text   status
 }
 
 %% ────── cardinalities ──────
-provider      ||--o{ provider_medical_group : ""
-medical_group ||--o{ provider_medical_group : ""
+individual_providers ||--o{ individual_provider_medical_group : ""
+medical_groups       ||--o{ individual_provider_medical_group : ""
 
-medical_group ||--o{ medical_group_hospital : ""
-hospital      ||--o{ medical_group_hospital : ""
+medical_groups ||--o{ medical_group_hospital : ""
+hospitals      ||--o{ medical_group_hospital : ""
 
-hospital      ||--o{ hospital_network : ""
-network       ||--o{ hospital_network : ""
+hospitals ||--o{ hospital_network : ""
+networks  ||--o{ hospital_network : ""
+
+medical_groups ||--o{ medical_group_network : ""
+networks       ||--o{ medical_group_network : ""
