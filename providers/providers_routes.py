@@ -22,3 +22,17 @@ def networks():
     conn.close()
     
     return render_template('networks.html', networks=networks)
+
+@providers_bp.route('/hospitals')
+def hospitals():
+    database_url = os.environ['DATABASE_URL']
+    conn = psycopg2.connect(database_url)
+    cur = conn.cursor()
+    
+    cur.execute("SELECT hospital_id, name, ccn, address_line, city, state, zip FROM hospitals ORDER BY hospital_id")
+    hospitals = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
+    return render_template('hospitals.html', hospitals=hospitals)
