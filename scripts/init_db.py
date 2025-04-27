@@ -49,7 +49,7 @@ def init_db():
         logger.info("Running database migrations...")
         with app.app_context():
             from flask_migrate import upgrade
-            upgrade(directory='migrations')
+            upgrade()
             
         logger.info("Database initialization completed successfully")
         return 0
