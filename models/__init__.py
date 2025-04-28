@@ -3,6 +3,7 @@ from .db import db
 from .auth import User
 from .provider import IndividualProvider
 from .provider_audit import ProviderAudit
+from .work_queue import WorkQueueItem
 from .medical_group import MedicalGroup
 from .hospital import Hospital 
 from .network import Network
