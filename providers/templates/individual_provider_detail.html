@@ -6,8 +6,22 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.utc-time').forEach(function(element) {
                 const utcTime = element.getAttribute('data-utc');
-                const localTime = new Date(utcTime + ' UTC').toLocaleString();
-                element.textContent = localTime;
+                const date = new Date(utcTime + ' UTC');
+                
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const month = monthNames[date.getMonth()];
+                const day = date.getDate();
+                const year = date.getFullYear();
+                
+                const hours = date.getHours();
+                const minutes = date.getMinutes();
+                const ampm = hours >= 12 ? 'pm' : 'am';
+                const formattedHours = hours % 12 || 12;
+                const formattedMinutes = minutes.toString().padStart(2, '0');
+                
+                const formattedDate = `${month} ${day}, ${year}\n${formattedHours}:${formattedMinutes}${ampm} Eastern Time`;
+                element.textContent = formattedDate;
+                element.style.whiteSpace = 'pre-line';
             });
         });
     </script>
