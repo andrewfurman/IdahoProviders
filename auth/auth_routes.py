@@ -3,7 +3,7 @@ from flask import Blueprint, request, url_for, jsonify, redirect, current_app, r
 from flask_login import login_user, logout_user, current_user
 from flask_mail import Message
 from main import db, mail, ts, login_mgr
-from .auth_models import User
+from models.auth import User
 
 bp = Blueprint("auth", __name__, template_folder='templates', static_folder='static')
 
