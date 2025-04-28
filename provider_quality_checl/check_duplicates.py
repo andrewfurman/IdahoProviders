@@ -1,0 +1,1 @@
+# This function will check for duplicate individual providers in the database.  This will intake the ID for an individual provider, and return JSON indicating: "Exact Duplicate Found", "Partial Duplicate Found", or "No Duplicate Found". It will also include the ID of the duplicate provider(s) if found. 
