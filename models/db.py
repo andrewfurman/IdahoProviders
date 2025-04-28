@@ -1,4 +1,1 @@
-
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from main import db        # now no second instance!
