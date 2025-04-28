@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort, request, redirect, url_for, flash
+from flask import Blueprint, render_template, abort, request, redirect, url_for, flash, current_app
 from main import db
 from models import IndividualProvider, MedicalGroup, Hospital, Network, ProviderGroup
 
@@ -80,7 +80,7 @@ def update_provider(provider_id):
                 db.session.flush()  # Test if audit record can be created
             except Exception as e:
                 db.session.rollback()
-                app.logger.error(f"Failed to create audit record: {str(e)}")
+                current_app.logger.error(f"Failed to create audit record: {str(e)}")
                 flash(f'Error creating audit record: {str(e)}')
                 return redirect(url_for('providers.provider_detail', provider_id=provider_id))
         
@@ -95,7 +95,7 @@ def update_provider(provider_id):
         flash('Provider updated successfully')
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Failed to update provider: {str(e)}")
+        current_app.logger.error(f"Failed to update provider: {str(e)}")
         flash(f'Error updating provider: {str(e)}')
         
     return redirect(url_for('providers.provider_detail', provider_id=provider_id))
