@@ -20,30 +20,60 @@ def provider_detail(provider_id):
 
 @providers_bp.route('/individual_providers/<int:provider_id>/update', methods=['POST'])
 def update_provider(provider_id):
+    from flask_login import current_user
+    from models.provider_audit import ProviderAudit
+    
     provider = db.session.query(IndividualProvider).get(provider_id)
     if provider is None:
         abort(404)
-        
-    # Update provider fields from form data
-    provider.npi = request.form.get('npi')
-    provider.first_name = request.form.get('first_name')
-    provider.last_name = request.form.get('last_name')
-    provider.gender = request.form.get('gender')
-    provider.phone = request.form.get('phone')
-    provider.provider_type = request.form.get('provider_type')
-    provider.accepting_new_patients = request.form.get('accepting_new_patients') == 'true'
-    provider.specialties = request.form.get('specialties')
-    provider.board_certifications = request.form.get('board_certifications')
-    provider.languages = request.form.get('languages')
-    provider.address_line = request.form.get('address_line')
-    provider.city = request.form.get('city')
-    provider.state = request.form.get('state')
-    provider.zip = request.form.get('zip')
-
+    
+    # Fields to track for audit
+    fields_to_track = {
+        'npi': 'NPI',
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
+        'gender': 'Gender',
+        'phone': 'Phone',
+        'provider_type': 'Provider Type',
+        'accepting_new_patients': 'Accepting New Patients',
+        'specialties': 'Specialties',
+        'board_certifications': 'Board Certifications',
+        'languages': 'Languages',
+        'address_line': 'Address',
+        'city': 'City',
+        'state': 'State',
+        'zip': 'ZIP'
+    }
+    
     try:
+        # Track changes and create audit records
+        for field, display_name in fields_to_track.items():
+            old_value = str(getattr(provider, field))
+            new_value = str(request.form.get(field))
+            
+            # For boolean fields
+            if field == 'accepting_new_patients':
+                new_value = str(request.form.get(field) == 'true')
+            
+            if old_value != new_value:
+                audit = ProviderAudit(
+                    provider_id=provider_id,
+                    field_updated=display_name,
+                    old_value=old_value,
+                    new_value=new_value,
+                    change_description=f"Updated {display_name}",
+                    user_id=current_user.id if current_user.is_authenticated else None
+                )
+                db.session.add(audit)
+                
+                # Update the provider field
+                setattr(provider, field, request.form.get(field))
+                if field == 'accepting_new_patients':
+                    setattr(provider, field, request.form.get(field) == 'true')
+        
         db.session.commit()
         flash('Provider updated successfully')
-    except:
+    except Exception as e:
         db.session.rollback()
         flash('Error updating provider')
         
