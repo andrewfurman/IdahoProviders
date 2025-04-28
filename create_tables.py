@@ -44,6 +44,23 @@ def create_tables():
         """)
         
         cur.execute("""
+            CREATE TABLE IF NOT EXISTS individual_provider_audit (
+                audit_id SERIAL PRIMARY KEY,
+                provider_id INTEGER REFERENCES individual_providers(provider_id),
+                field_updated TEXT NOT NULL,
+                old_value TEXT,
+                new_value TEXT,
+                change_description TEXT,
+                edit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                user_id INTEGER REFERENCES users(id),
+                CONSTRAINT fk_provider FOREIGN KEY (provider_id) 
+                    REFERENCES individual_providers(provider_id) ON DELETE CASCADE,
+                CONSTRAINT fk_user FOREIGN KEY (user_id) 
+                    REFERENCES users(id) ON DELETE SET NULL
+            )
+        """)
+        
+        cur.execute("""
             CREATE TABLE IF NOT EXISTS medical_groups (
                 group_id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
