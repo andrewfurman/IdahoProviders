@@ -4,6 +4,9 @@ from models.network import Network
 
 def insert_networks():
     try:
+        # First clear existing networks
+        Network.query.delete()
+        db.session.commit()
         networks = [
             Network(code='KCN', name='Kootenai Care Network'),
             Network(code='HNPN', name='Hometown North Provider Network'),
