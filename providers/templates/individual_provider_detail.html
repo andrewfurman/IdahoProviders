@@ -177,23 +177,27 @@
 </div>
 {% endblock %}
 
+{% endblock %}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.utc-time').forEach(function(element) {
         const utcTime = element.getAttribute('data-utc');
-        const date = new Date(utcTime + 'Z'); // Use Z to properly indicate UTC
+        const date = new Date(utcTime);
         
-        const monthNames = ["Apr", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const month = monthNames[date.getMonth()];
         const day = date.getDate();
         const year = date.getFullYear();
         
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const ampm = hours >= 12 ? 'pm' : 'am';
-        const formattedHours = hours % 12 || 12;
-        const formattedMinutes = minutes.toString().padStart(2, '0');
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZoneName: 'short'
+        });
         
-        element.innerHTML = `${monthNames[date.getMonth()]} ${day}, ${year}<br>${formattedHours}:${formattedMinutes}${ampm} Eastern Time`;
+        element.innerHTML = `${month} ${day}, ${year}<br>${formattedTime}`;
     });
 });
 </script>
