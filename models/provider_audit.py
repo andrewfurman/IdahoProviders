@@ -16,5 +16,5 @@ class ProviderAudit(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'))
 
     # Relationships
-    provider = db.relationship('IndividualProvider', backref='audits')
-    user = db.relationship('User', backref='provider_audits')
+    provider = db.relationship('IndividualProvider', backref=db.backref('audits', lazy='dynamic'))
+    user = db.relationship('User')
