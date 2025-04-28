@@ -1,4 +1,3 @@
-
 from flask import Flask, redirect, url_for
 from providers.providers_routes import providers_bp, db
 from flask_mail import Mail
@@ -8,37 +7,59 @@ import os
 
 app = Flask(__name__)
 
-# Configure app
-app.config.from_prefixed_env()  # Loads FLASK_ and other prefixed env vars
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# ────────────────────────────────────────────────────────────────
+# Core configuration
+# ────────────────────────────────────────────────────────────────
+# Database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Set secret key
-if 'FLASK_SECRET_KEY' not in os.environ:
-    raise ValueError("FLASK_SECRET_KEY environment variable is not set")
-if 'SECURITY_TOKEN_SALT' not in os.environ:
-    raise ValueError("SECURITY_TOKEN_SALT environment variable is not set")
+# Secrets ─── raise early if they’re missing
+try:
+    app.config["FLASK_SECRET_KEY"] = os.environ["FLASK_SECRET_KEY"]
+    app.config["SECURITY_TOKEN_SALT"] = os.environ["SECURITY_TOKEN_SALT"]
+except KeyError as missing:
+    raise ValueError(f"Required environment variable {missing} is not set")
 
-app.secret_key = os.environ['FLASK_SECRET_KEY']
+# `app.secret_key` writes to app.config["SECRET_KEY"]; keep both for clarity
+app.secret_key = app.config["FLASK_SECRET_KEY"]
 
-# Initialize extensions
+# Mail (optional—but convenient to load here)
+app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", "587"))
+app.config["MAIL_USE_TLS"] = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
+app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.environ.get(
+    "EMAILS_SENT_FROM", app.config["MAIL_USERNAME"]
+)
+
+# ────────────────────────────────────────────────────────────────
+# Initialise extensions
+# ────────────────────────────────────────────────────────────────
 db.init_app(app)
 mail = Mail(app)
 login_manager = LoginManager(app)
 
 ts = URLSafeTimedSerializer(
     secret_key=app.config["FLASK_SECRET_KEY"],
-    salt=app.config["SECURITY_TOKEN_SALT"]
+    salt=app.config["SECURITY_TOKEN_SALT"],
 )
 
-# Register blueprints
-from auth import bp as auth_bp
+# ────────────────────────────────────────────────────────────────
+# Blueprints & routes
+# ────────────────────────────────────────────────────────────────
+from auth import bp as auth_bp  # noqa: E402  (import after app creation)
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(providers_bp)
 
-@app.route('/')
+@app.route("/")
 def index():
-    return redirect(url_for('providers.providers'))
+    return redirect(url_for("providers.providers"))
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+# ────────────────────────────────────────────────────────────────
+# Entrypoint
+# ────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    # Let gunicorn handle serving in production; this is for local runs
+    app.run(host="0.0.0.0", port=5000)
