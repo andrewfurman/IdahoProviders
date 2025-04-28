@@ -1,6 +1,8 @@
 
-from typing import Dict, List
+from typing import Dict
 from models.db import db
+from models.provider import IndividualProvider
+from sqlalchemy import func
 
 def check_provider_duplicates(provider_id: int) -> Dict:
     """
@@ -8,12 +10,8 @@ def check_provider_duplicates(provider_id: int) -> Dict:
     Returns JSON with duplicate status and IDs of any duplicates found
     """
     # Get provider details
-    provider = db.session.execute("""
-        SELECT npi, first_name, last_name, phone, address_line, city, state, zip
-        FROM individual_providers 
-        WHERE provider_id = :id
-    """, {'id': provider_id}).fetchone()
-    
+    provider = db.session.query(IndividualProvider).get(provider_id)
+
     if not provider:
         return {
             "status": "No Provider Found",
@@ -21,12 +19,10 @@ def check_provider_duplicates(provider_id: int) -> Dict:
         }
 
     # Check for exact duplicates (same NPI)
-    exact_duplicates = db.session.execute("""
-        SELECT provider_id 
-        FROM individual_providers
-        WHERE npi = :npi 
-        AND provider_id != :id
-    """, {'npi': provider.npi, 'id': provider_id}).fetchall()
+    exact_duplicates = db.session.query(IndividualProvider.provider_id)\
+        .filter(IndividualProvider.npi == provider.npi)\
+        .filter(IndividualProvider.provider_id != provider_id)\
+        .all()
 
     if exact_duplicates:
         return {
@@ -35,32 +31,25 @@ def check_provider_duplicates(provider_id: int) -> Dict:
         }
 
     # Check for partial duplicates (same name + location or phone)
-    partial_duplicates = db.session.execute("""
-        SELECT provider_id
-        FROM individual_providers
-        WHERE provider_id != :id
-        AND LOWER(first_name) = LOWER(:first_name)
-        AND LOWER(last_name) = LOWER(:last_name)
-        AND (
-            (phone = :phone AND phone IS NOT NULL)
-            OR (
-                address_line = :address_line 
-                AND city = :city 
-                AND state = :state 
-                AND zip = :zip
-                AND address_line IS NOT NULL
+    partial_duplicates = db.session.query(IndividualProvider.provider_id)\
+        .filter(IndividualProvider.provider_id != provider_id)\
+        .filter(func.lower(IndividualProvider.first_name) == func.lower(provider.first_name))\
+        .filter(func.lower(IndividualProvider.last_name) == func.lower(provider.last_name))\
+        .filter(
+            db.or_(
+                db.and_(
+                    IndividualProvider.phone == provider.phone,
+                    IndividualProvider.phone != None
+                ),
+                db.and_(
+                    IndividualProvider.address_line == provider.address_line,
+                    IndividualProvider.city == provider.city,
+                    IndividualProvider.state == provider.state,
+                    IndividualProvider.zip == provider.zip,
+                    IndividualProvider.address_line != None
+                )
             )
-        )
-    """, {
-        'id': provider_id,
-        'first_name': provider.first_name,
-        'last_name': provider.last_name,
-        'phone': provider.phone,
-        'address_line': provider.address_line,
-        'city': provider.city,
-        'state': provider.state,
-        'zip': provider.zip
-    }).fetchall()
+        ).all()
 
     if partial_duplicates:
         return {
