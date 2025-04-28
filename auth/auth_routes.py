@@ -33,7 +33,14 @@ def request_link():
         
     user = User.query.filter_by(email=email).first()
     if not user:
-        return {"error": "No account found for that email"}, 404
+        # Create new user if not found
+        user = User(
+            email=email,
+            first_name=email.split('@')[0],  # Simple default first name
+            role='user'  # Default role
+        )
+        db.session.add(user)
+        db.session.commit()
 
     # Generate signed token with 24h expiry
     token = ts.dumps(email)
