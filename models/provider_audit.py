@@ -1,6 +1,7 @@
 
 from .db import db
 from datetime import datetime
+from auth.auth_models import User
 
 class ProviderAudit(db.Model):
     __tablename__ = 'individual_provider_audit'
@@ -16,4 +17,4 @@ class ProviderAudit(db.Model):
 
     # Relationships
     provider = db.relationship('IndividualProvider', backref=db.backref('audits', lazy='dynamic'))
-    user = db.relationship('auth.auth_models.User')
+    user = db.relationship('User', foreign_keys=[user_id])
