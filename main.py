@@ -17,6 +17,13 @@ app.config.from_prefixed_env()  # Loads FLASK_ and other prefixed env vars
 db.init_app(app)
 mail = Mail(app)
 login_manager = LoginManager(app)
+
+# Ensure secret key is set
+if not app.config.get("FLASK_SECRET_KEY"):
+    raise ValueError("FLASK_SECRET_KEY environment variable is not set")
+if not app.config.get("SECURITY_TOKEN_SALT"):
+    raise ValueError("SECURITY_TOKEN_SALT environment variable is not set")
+
 ts = URLSafeTimedSerializer(
     secret_key=app.config["FLASK_SECRET_KEY"],
     salt=app.config["SECURITY_TOKEN_SALT"]
