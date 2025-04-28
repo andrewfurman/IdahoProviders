@@ -1,7 +1,7 @@
 
 from flask import current_app
 from flask_mail import Message
-from extensions import mail
+from main import mail
 
 def send_login_email(user, link):
     """Send magic login link email to user
