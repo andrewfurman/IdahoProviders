@@ -8,6 +8,7 @@ from .REL_provider_group import ProviderGroup
 from .REL_group_hospital import GroupHospital
 from .REL_hospital_network import HospitalNetwork
 from .REL_group_network import GroupNetwork
+from .auth import User
 
 __all__ = [
     'db',
@@ -18,5 +19,6 @@ __all__ = [
     'ProviderGroup',
     'GroupHospital',
     'HospitalNetwork',
-    'GroupNetwork'
+    'GroupNetwork',
+    'User'
 ]
