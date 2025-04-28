@@ -1,10 +1,10 @@
+
 import psycopg2
 import os
-from datetime import date
+from datetime import date, datetime
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-from main import db
+from main import db, app
 from models import WorkQueueItem
-from datetime import datetime
 
 def insert_work_queue_items():
     try:
@@ -59,4 +59,5 @@ def insert_work_queue_items():
         db.session.rollback()
 
 if __name__ == "__main__":
-    insert_work_queue_items()
+    with app.app_context():
+        insert_work_queue_items()
