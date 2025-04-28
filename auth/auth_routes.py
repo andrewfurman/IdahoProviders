@@ -5,7 +5,7 @@ from flask_mail import Message
 from main import db, mail, ts, login_mgr
 from .auth_models import User
 
-bp = Blueprint("auth", __name__, template_folder='templates')
+bp = Blueprint("auth", __name__, template_folder='templates', static_folder='static')
 
 @bp.route('/login')
 def login():
