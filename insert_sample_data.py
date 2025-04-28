@@ -4,9 +4,8 @@ from models.network import Network
 
 def insert_networks():
     try:
-        # First clear existing networks
-        Network.query.delete()
-        db.session.commit()
+        # Get existing network codes to avoid duplicates
+        existing_codes = {n.code for n in Network.query.all()}
         networks = [
             Network(code='KCN', name='Kootenai Care Network'),
             Network(code='HNPN', name='Hometown North Provider Network'),
@@ -24,9 +23,9 @@ def insert_networks():
         ]
 
         for network in networks:
-            # Check if network already exists
-            existing = Network.query.filter_by(code=network.code).first()
-            if not existing:
+            # Only add if code doesn't already exist
+            if network.code not in existing_codes:
+                existing_codes.add(network.code)  # Update our tracking set
                 db.session.add(network)
 
         db.session.commit()
