@@ -1,6 +1,17 @@
 
 {% extends "header.html" %}
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.utc-time').forEach(function(element) {
+                const utcTime = element.getAttribute('data-utc');
+                const localTime = new Date(utcTime + ' UTC').toLocaleString();
+                element.textContent = localTime;
+            });
+        });
+    </script>
+
 {% block content %}
 <div class="py-8" style="padding-left: 20px; padding-right: 20px;">
     <div class="bg-white rounded-lg shadow p-6 max-w-5xl mx-auto">
@@ -148,7 +159,11 @@
                         {% if provider.audits %}
                             {% for audit in provider.audits|sort(attribute='edit_time', reverse=True) %}
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ audit.edit_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="utc-time" data-utc="{{ audit.edit_time.strftime('%Y-%m-%d %H:%M:%S') }}">
+                                        {{ audit.edit_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ audit.field_updated }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ audit.old_value or '' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ audit.new_value or '' }}</td>
