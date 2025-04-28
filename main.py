@@ -37,14 +37,8 @@ app.config["MAIL_DEFAULT_SENDER"] = os.environ.get(
 # ────────────────────────────────────────────────────────────────
 # Initialise extensions
 # ────────────────────────────────────────────────────────────────
-db.init_app(app)
-mail = Mail(app)
-login_manager = LoginManager(app)
-
-ts = URLSafeTimedSerializer(
-    secret_key=app.config["FLASK_SECRET_KEY"],
-    salt=app.config["SECURITY_TOKEN_SALT"],
-)
+from extensions import init_extensions
+init_extensions(app)
 
 # ────────────────────────────────────────────────────────────────
 # Blueprints & routes
