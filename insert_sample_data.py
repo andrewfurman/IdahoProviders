@@ -113,3 +113,19 @@ def insert_sample_data():
 
 if __name__ == "__main__":
     insert_sample_data()
+
+
+# Add work queue items
+queue_items = [
+    (1, 1, 'duplicate', 'Provider has similar name and credentials to Dr. S. Raybuck in Arizona - potential duplicate record', 'Review and compare records to confirm if duplicate', 'open', 1, 1),
+    (2, 2, 'bad_npi', 'NPI registry shows different specialty than what is listed in our database', 'Verify NPI information and update specialty if needed', 'open', 1, 1),
+    (3, 3, 'sanction', 'Name appears similar to entry on HHS sanction list - requires verification', 'Cross reference with official HHS sanction database', 'open', 1, 1)
+]
+
+for qi in queue_items:
+    cur.execute("""
+        INSERT INTO work_queue_items 
+        (queue_id, provider_id, issue_type, description, recommended_action, status, assigned_user_id, created_by_user_id)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        ON CONFLICT (queue_id) DO NOTHING
+    """, qi)
