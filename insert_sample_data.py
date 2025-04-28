@@ -1,58 +1,33 @@
-
-import psycopg2
 import os
-from datetime import date, datetime
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from main import db, app
-from models import WorkQueueItem
+from models.network import Network
 
-def insert_work_queue_items():
+def insert_networks():
     try:
-        # Create work queue items
-        queue_items = [
-            WorkQueueItem(
-                queue_id=1,
-                provider_id=1,
-                issue_type='duplicate',
-                description='Provider has similar name and credentials to Dr. S. Raybuck in Arizona - potential duplicate record',
-                recommended_action='Review and compare records to confirm if duplicate',
-                status='open',
-                assigned_user_id=1,
-                created_by_user_id=1,
-                created_at=datetime.utcnow()
-            ),
-            WorkQueueItem(
-                queue_id=2,
-                provider_id=2,
-                issue_type='bad_npi',
-                description='NPI registry shows different specialty than what is listed in our database',
-                recommended_action='Verify NPI information and update specialty if needed',
-                status='open',
-                assigned_user_id=1,
-                created_by_user_id=1,
-                created_at=datetime.utcnow()
-            ),
-            WorkQueueItem(
-                queue_id=3,
-                provider_id=3,
-                issue_type='sanction',
-                description='Name appears similar to entry on HHS sanction list - requires verification',
-                recommended_action='Cross reference with official HHS sanction database',
-                status='open',
-                assigned_user_id=1,
-                created_by_user_id=1,
-                created_at=datetime.utcnow()
-            )
+        networks = [
+            Network(code='KCN', name='Kootenai Care Network'),
+            Network(code='HNPN', name='Hometown North Provider Network'),
+            Network(code='CPN', name='Clearwater Provider Network'),
+            Network(code='SLHP', name='St. Luke\'s Health Partners'),
+            Network(code='HSWPN', name='Hometown South-West Provider Network'),
+            Network(code='IDID', name='Independent Doctors of Idaho'),
+            Network(code='MVN', name='Mountain View Network'),
+            Network(code='HEPN', name='Hometown East Provider Network'),
+            Network(code='PQA', name='Patient Quality Alliance'),
+            Network(code='MAHMO', name='True Blue HMO'),
+            Network(code='MAPPO', name='Secure Blue PPO'),
+            Network(code='MMCPHMO', name='True Blue Special Needs Plan'),
+            Network(code='MICRON', name='Micron CDHP/PPO')
         ]
 
-        for item in queue_items:
-            # Add if not exists
-            existing_item = WorkQueueItem.query.get(item.queue_id)
-            if not existing_item:
-                db.session.add(item)
+        for network in networks:
+            # Check if network already exists
+            existing = Network.query.filter_by(code=network.code).first()
+            if not existing:
+                db.session.add(network)
 
         db.session.commit()
-        print("Work queue items created successfully!")
+        print("Networks inserted successfully!")
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -60,4 +35,4 @@ def insert_work_queue_items():
 
 if __name__ == "__main__":
     with app.app_context():
-        insert_work_queue_items()
+        insert_networks()
