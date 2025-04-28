@@ -24,15 +24,15 @@ def insert_networks():
             {'code': 'MICRON', 'name': 'Micron CDHP/PPO'}
         ]
 
-        # Filter out networks that already exist
-        new_networks = [n for n in networks_to_add if n['code'] not in existing_codes]
-
-        if new_networks:
-            db.session.bulk_insert_mappings(Network, new_networks)
-            db.session.commit()
-            print("Networks inserted successfully!")
-        else:
-            print("No new networks to insert.")
+        # Filter and add networks one by one
+        for network in networks_to_add:
+            if network['code'] not in existing_codes:
+                new_network = Network(code=network['code'], name=network['name'])
+                db.session.add(new_network)
+                existing_codes.add(network['code'])  # Update our tracking set
+        
+        db.session.commit()
+        print("Networks inserted successfully!")
 
     except Exception as e:
         print(f"An error occurred: {e}")
