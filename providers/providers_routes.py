@@ -46,7 +46,10 @@ def update_provider(provider_id):
     }
     
     try:
-        # Track changes and create audit records
+        audit_records = []
+        field_updates = []
+        
+        # First pass - collect all changes
         for field, display_name in fields_to_track.items():
             old_value = str(getattr(provider, field))
             new_value = str(request.form.get(field))
@@ -56,6 +59,10 @@ def update_provider(provider_id):
                 new_value = str(request.form.get(field) == 'true')
             
             if old_value != new_value:
+                # Store the change
+                field_updates.append((field, request.form.get(field), field == 'accepting_new_patients'))
+                
+                # Create audit record
                 audit = ProviderAudit(
                     provider_id=provider_id,
                     field_updated=display_name,
@@ -64,18 +71,32 @@ def update_provider(provider_id):
                     change_description=f"Updated {display_name}",
                     user_id=current_user.id if current_user.is_authenticated else None
                 )
+                audit_records.append(audit)
+        
+        # Second pass - apply all changes if audit records were created successfully
+        for audit in audit_records:
+            try:
                 db.session.add(audit)
-                
-                # Update the provider field
-                setattr(provider, field, request.form.get(field))
-                if field == 'accepting_new_patients':
-                    setattr(provider, field, request.form.get(field) == 'true')
+                db.session.flush()  # Test if audit record can be created
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"Failed to create audit record: {str(e)}")
+                flash(f'Error creating audit record: {str(e)}')
+                return redirect(url_for('providers.provider_detail', provider_id=provider_id))
+        
+        # Apply the actual field updates
+        for field, value, is_boolean in field_updates:
+            if is_boolean:
+                setattr(provider, field, value == 'true')
+            else:
+                setattr(provider, field, value)
         
         db.session.commit()
         flash('Provider updated successfully')
     except Exception as e:
         db.session.rollback()
-        flash('Error updating provider')
+        app.logger.error(f"Failed to update provider: {str(e)}")
+        flash(f'Error updating provider: {str(e)}')
         
     return redirect(url_for('providers.provider_detail', provider_id=provider_id))
 
