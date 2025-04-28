@@ -1,9 +1,19 @@
 
-"""
-This file will contain:
-1. send_login_email() helper function
-2. Email template rendering logic
-3. SMTP connection management
-4. Error handling for email failures
-5. Logging for email operations
-"""
+from flask import current_app
+from flask_mail import Message
+from extensions import mail
+
+def send_login_email(user, link):
+    """Send magic login link email to user
+    
+    Args:
+        user: User model instance with email and first_name
+        link: Generated login URL with token
+    """
+    msg = Message(
+        subject="Your magic login link",
+        recipients=[user.email],
+        body=f"Hello {user.first_name},\n\nClick to log in: {link}\n\nThis link expires in 24 hours.",
+        sender=current_app.config["EMAILS_SENT_FROM"]
+    )
+    mail.send(msg)
