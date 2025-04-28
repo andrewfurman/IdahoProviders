@@ -1,10 +1,6 @@
 from flask import Blueprint, render_template, abort
-from extensions import db
-from models.provider import IndividualProvider
-from models.medical_group import MedicalGroup
-from models.hospital import Hospital
-from models.network import Network
-from models.provider_group import ProviderGroup
+from main import db
+from models import IndividualProvider, MedicalGroup, Hospital, Network, ProviderGroup
 
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')

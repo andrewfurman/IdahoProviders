@@ -1,9 +1,15 @@
+
 from flask import Flask, redirect, url_for
-from providers.providers_routes import providers_bp, db
+from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_login import LoginManager
 from itsdangerous import URLSafeTimedSerializer
 import os
+
+# Initialize extensions
+db = SQLAlchemy()
+mail = Mail()
+login_mgr = LoginManager()
 
 app = Flask(__name__)
 
@@ -14,7 +20,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Secrets ─── raise early if they’re missing
+# Secrets ─── raise early if they're missing
 try:
     app.config["FLASK_SECRET_KEY"] = os.environ["FLASK_SECRET_KEY"]
     app.config["SECURITY_TOKEN_SALT"] = os.environ["SECURITY_TOKEN_SALT"]
@@ -34,16 +40,23 @@ app.config["MAIL_DEFAULT_SENDER"] = os.environ.get(
     "EMAILS_SENT_FROM", app.config["MAIL_USERNAME"]
 )
 
-# ────────────────────────────────────────────────────────────────
-# Initialise extensions
-# ────────────────────────────────────────────────────────────────
-from extensions import init_extensions
-init_extensions(app)
+# Initialize extensions with app
+db.init_app(app)
+mail.init_app(app)
+login_mgr.init_app(app)
+
+# Create URL safe serializer
+ts = URLSafeTimedSerializer(
+    secret_key=app.config["FLASK_SECRET_KEY"],
+    salt=app.config["SECURITY_TOKEN_SALT"]
+)
 
 # ────────────────────────────────────────────────────────────────
 # Blueprints & routes
 # ────────────────────────────────────────────────────────────────
-from auth import bp as auth_bp  # noqa: E402  (import after app creation)
+from providers.providers_routes import providers_bp
+from auth import bp as auth_bp
+
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(providers_bp)
 
@@ -55,5 +68,4 @@ def index():
 # Entrypoint
 # ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    # Let gunicorn handle serving in production; this is for local runs
     app.run(host="0.0.0.0", port=5000)
