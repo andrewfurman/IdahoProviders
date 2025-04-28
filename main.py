@@ -54,10 +54,10 @@ ts = URLSafeTimedSerializer(
 # Blueprints & routes
 # ────────────────────────────────────────────────────────────────
 from providers.providers_routes import providers_bp
-from work_queues.work_queue_routes import wq_bp
+from auth import bp as auth_bp
 
+app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(providers_bp)
-app.register_blueprint(wq_bp)
 
 @app.route("/")
 def index():
