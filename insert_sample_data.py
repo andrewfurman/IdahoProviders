@@ -1,3 +1,4 @@
+
 import os
 from main import db, app
 from models.network import Network
@@ -6,30 +7,32 @@ def insert_networks():
     try:
         # Get existing network codes to avoid duplicates
         existing_codes = {n.code for n in Network.query.all()}
-        networks = [
-            Network(code='KCN', name='Kootenai Care Network'),
-            Network(code='HNPN', name='Hometown North Provider Network'),
-            Network(code='CPN', name='Clearwater Provider Network'),
-            Network(code='SLHP', name='St. Luke\'s Health Partners'),
-            Network(code='HSWPN', name='Hometown South-West Provider Network'),
-            Network(code='IDID', name='Independent Doctors of Idaho'),
-            Network(code='MVN', name='Mountain View Network'),
-            Network(code='HEPN', name='Hometown East Provider Network'),
-            Network(code='PQA', name='Patient Quality Alliance'),
-            Network(code='MAHMO', name='True Blue HMO'),
-            Network(code='MAPPO', name='Secure Blue PPO'),
-            Network(code='MMCPHMO', name='True Blue Special Needs Plan'),
-            Network(code='MICRON', name='Micron CDHP/PPO')
+        
+        networks_to_add = [
+            {'code': 'KCN', 'name': 'Kootenai Care Network'},
+            {'code': 'HNPN', 'name': 'Hometown North Provider Network'},
+            {'code': 'CPN', 'name': 'Clearwater Provider Network'},
+            {'code': 'SLHP', 'name': 'St. Luke\'s Health Partners'},
+            {'code': 'HSWPN', 'name': 'Hometown South-West Provider Network'},
+            {'code': 'IDID', 'name': 'Independent Doctors of Idaho'},
+            {'code': 'MVN', 'name': 'Mountain View Network'},
+            {'code': 'HEPN', 'name': 'Hometown East Provider Network'},
+            {'code': 'PQA', 'name': 'Patient Quality Alliance'},
+            {'code': 'MAHMO', 'name': 'True Blue HMO'},
+            {'code': 'MAPPO', 'name': 'Secure Blue PPO'},
+            {'code': 'MMCPHMO', 'name': 'True Blue Special Needs Plan'},
+            {'code': 'MICRON', 'name': 'Micron CDHP/PPO'}
         ]
 
-        for network in networks:
-            # Only add if code doesn't already exist
-            if network.code not in existing_codes:
-                existing_codes.add(network.code)  # Update our tracking set
-                db.session.add(network)
+        # Filter out networks that already exist
+        new_networks = [n for n in networks_to_add if n['code'] not in existing_codes]
 
-        db.session.commit()
-        print("Networks inserted successfully!")
+        if new_networks:
+            db.session.bulk_insert_mappings(Network, new_networks)
+            db.session.commit()
+            print("Networks inserted successfully!")
+        else:
+            print("No new networks to insert.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
