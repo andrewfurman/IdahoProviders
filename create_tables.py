@@ -134,6 +134,24 @@ def create_tables():
                 UNIQUE(group_id, network_id)
             )
         """)
+
+        # Create work queue table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS work_queue_items (
+                queue_id SERIAL PRIMARY KEY,
+                provider_id INTEGER NOT NULL
+                    REFERENCES individual_providers(provider_id) ON DELETE CASCADE,
+                issue_type VARCHAR(40) NOT NULL,
+                description TEXT NOT NULL,
+                recommended_action TEXT,
+                status VARCHAR(20) NOT NULL DEFAULT 'open',
+                assigned_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                resolved_at TIMESTAMP
+            )
+        """)
         
         print("All tables created successfully!")
         
