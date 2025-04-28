@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config.from_prefixed_env()  # Loads FLASK_ and other prefixed env vars
+app.secret_key = os.environ['FLASK_SECRET_KEY']
 
 # Initialize extensions
 db.init_app(app)
