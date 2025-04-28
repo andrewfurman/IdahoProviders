@@ -9,21 +9,22 @@ import os
 app = Flask(__name__)
 
 # Configure app
+app.config.from_prefixed_env()  # Loads FLASK_ and other prefixed env vars
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config.from_prefixed_env()  # Loads FLASK_ and other prefixed env vars
+
+# Set secret key
+if 'FLASK_SECRET_KEY' not in os.environ:
+    raise ValueError("FLASK_SECRET_KEY environment variable is not set")
+if 'SECURITY_TOKEN_SALT' not in os.environ:
+    raise ValueError("SECURITY_TOKEN_SALT environment variable is not set")
+
 app.secret_key = os.environ['FLASK_SECRET_KEY']
 
 # Initialize extensions
 db.init_app(app)
 mail = Mail(app)
 login_manager = LoginManager(app)
-
-# Ensure secret key is set
-if not app.config.get("FLASK_SECRET_KEY"):
-    raise ValueError("FLASK_SECRET_KEY environment variable is not set")
-if not app.config.get("SECURITY_TOKEN_SALT"):
-    raise ValueError("SECURITY_TOKEN_SALT environment variable is not set")
 
 ts = URLSafeTimedSerializer(
     secret_key=app.config["FLASK_SECRET_KEY"],
