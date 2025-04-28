@@ -18,6 +18,37 @@ def provider_detail(provider_id):
 
     return render_template('individual_provider_detail.html', provider=provider, medical_groups=medical_groups)
 
+@providers_bp.route('/individual_providers/<int:provider_id>/update', methods=['POST'])
+def update_provider(provider_id):
+    provider = db.session.query(IndividualProvider).get(provider_id)
+    if provider is None:
+        abort(404)
+        
+    # Update provider fields from form data
+    provider.npi = request.form.get('npi')
+    provider.first_name = request.form.get('first_name')
+    provider.last_name = request.form.get('last_name')
+    provider.gender = request.form.get('gender')
+    provider.phone = request.form.get('phone')
+    provider.provider_type = request.form.get('provider_type')
+    provider.accepting_new_patients = request.form.get('accepting_new_patients') == 'true'
+    provider.specialties = request.form.get('specialties')
+    provider.board_certifications = request.form.get('board_certifications')
+    provider.languages = request.form.get('languages')
+    provider.address_line = request.form.get('address_line')
+    provider.city = request.form.get('city')
+    provider.state = request.form.get('state')
+    provider.zip = request.form.get('zip')
+
+    try:
+        db.session.commit()
+        flash('Provider updated successfully')
+    except:
+        db.session.rollback()
+        flash('Error updating provider')
+        
+    return redirect(url_for('providers.provider_detail', provider_id=provider_id))
+
 @providers_bp.route('/medical_groups')
 def medical_groups():
     groups = db.session.query(MedicalGroup).order_by(MedicalGroup.group_id).all()
