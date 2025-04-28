@@ -18,6 +18,12 @@ app = Flask(__name__)
 # Database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,  # Recycle connections every 5 minutes
+    'pool_timeout': 30,   # Connection timeout of 30 seconds
+    'pool_size': 10       # Maximum pool size
+}
 
 # Secrets ─── raise early if they're missing
 try:
