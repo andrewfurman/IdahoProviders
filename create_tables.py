@@ -11,6 +11,17 @@ def create_tables():
     cur = conn.cursor()
     
     try:
+        # Create users table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                first_name VARCHAR(120),
+                last_name VARCHAR(120),
+                role VARCHAR(50)
+            )
+        """)
+        
         # Create core tables
         cur.execute("""
             CREATE TABLE IF NOT EXISTS individual_providers (
