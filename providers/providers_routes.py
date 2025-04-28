@@ -43,3 +43,27 @@ def networks():
 def hospitals():
     hospitals = db.session.query(Hospital).order_by(Hospital.hospital_id).all()
     return render_template('hospitals.html', hospitals=hospitals)
+
+@providers_bp.route('/hospitals/<int:hospital_id>')
+def hospital_detail(hospital_id):
+    hospital = db.session.query(Hospital).get(hospital_id)
+    if hospital is None:
+        abort(404)
+    return render_template('hospital_detail.html', hospital=hospital)
+
+@providers_bp.route('/hospitals/<int:hospital_id>/update', methods=['POST'])
+def update_hospital(hospital_id):
+    hospital = db.session.query(Hospital).get(hospital_id)
+    if hospital is None:
+        abort(404)
+        
+    hospital.name = request.form.get('name')
+    hospital.ccn = request.form.get('ccn')
+    hospital.address_line = request.form.get('address_line')
+    hospital.city = request.form.get('city')
+    hospital.state = request.form.get('state')
+    hospital.zip = request.form.get('zip')
+    
+    db.session.commit()
+    flash('Hospital updated successfully', 'success')
+    return redirect(url_for('providers.hospital_detail', hospital_id=hospital_id))
