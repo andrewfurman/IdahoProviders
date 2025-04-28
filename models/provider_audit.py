@@ -20,4 +20,4 @@ class ProviderAudit(db.Model):
 
     # Relationships
     provider = db.relationship('IndividualProvider', backref=db.backref('audits', lazy='dynamic'))
-    user = db.relationship('auth.User', foreign_keys=[user_id])
+    user = db.relationship('User', foreign_keys=[user_id])
