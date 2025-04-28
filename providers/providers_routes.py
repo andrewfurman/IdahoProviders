@@ -1,5 +1,11 @@
 from flask import Blueprint, render_template, abort
-from models import db, IndividualProvider, Network, Hospital, MedicalGroup, ProviderGroup
+from extensions import db
+from models.provider import IndividualProvider
+from models.medical_group import MedicalGroup
+from models.hospital import Hospital
+from models.network import Network
+from models.provider_group import ProviderGroup
+
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
 
@@ -8,12 +14,12 @@ def provider_detail(provider_id):
     provider = db.session.query(IndividualProvider).get(provider_id)
     if provider is None:
         abort(404)
-    
+
     medical_groups = db.session.query(MedicalGroup)\
         .join(ProviderGroup, ProviderGroup.group_id == MedicalGroup.group_id)\
         .filter(ProviderGroup.provider_id == provider_id)\
         .all()
-        
+
     return render_template('individual_provider_detail.html', provider=provider, medical_groups=medical_groups)
 
 @providers_bp.route('/medical_groups')
