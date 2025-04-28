@@ -4,8 +4,12 @@ from flask_login import current_user
 from main import db
 from models import IndividualProvider
 from models.provider_audit import ProviderAudit
+from models.auth import User
 import logging
 import traceback
+
+logger = logging.getLogger(__name__)
+logger.debug("Models imported: IndividualProvider, ProviderAudit, User")
 
 def update_individual_provider(provider_id):
     logger = current_app.logger
