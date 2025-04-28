@@ -176,28 +176,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% endblock %}
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.utc-time').forEach(function(element) {
-        const utcTime = element.getAttribute('data-utc');
-        const date = new Date(utcTime);
-        
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const month = monthNames[date.getMonth()];
-        const day = date.getDate();
-        const year = date.getFullYear();
-        
-        const formattedTime = date.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-            timeZoneName: 'short'
-        });
-        
-        element.innerHTML = `${month} ${day}, ${year}<br>${formattedTime}`;
-    });
-});
-</script>
