@@ -52,13 +52,8 @@ def request_link():
     login_link = url_for("auth.login_with_token", token=token, _external=True)
 
     # Send email with magic link
-    msg = Message(
-        subject="Your magic login link",
-        recipients=[user.email],
-        body=f"Hello {user.first_name},\n\nClick to log in: {login_link}\n\nThis link expires in 24 hours.",
-        sender=current_app.config["MAIL_DEFAULT_SENDER"]
-    )
-    mail.send(msg)
+    from auth.auth_emails import send_login_email
+    send_login_email(user, login_link)
 
     return {"message": "Login link sent to your email"}, 202
 
