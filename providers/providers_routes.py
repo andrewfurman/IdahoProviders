@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for, flash, current_app
 from main import db
-from models import IndividualProvider, MedicalGroup, Hospital, Network, ProviderGroup
+from models import IndividualProvider, MedicalGroup, Hospital, Network, ProviderGroup, HospitalNetwork
 
 
 providers_bp = Blueprint('providers', __name__, template_folder='templates')
