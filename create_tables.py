@@ -1,15 +1,14 @@
-
 import os
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 def create_tables():
     database_url = os.environ['DATABASE_URL']
-    
+
     conn = psycopg2.connect(database_url)
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
-    
+
     try:
         # Create users table
         cur.execute("""
@@ -21,7 +20,7 @@ def create_tables():
                 role VARCHAR(50)
             )
         """)
-        
+
         # Create core tables
         cur.execute("""
             CREATE TABLE IF NOT EXISTS individual_providers (
@@ -42,7 +41,7 @@ def create_tables():
                 zip TEXT
             )
         """)
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS individual_provider_audit (
                 audit_id SERIAL PRIMARY KEY,
@@ -57,7 +56,7 @@ def create_tables():
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
             )
         """)
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS medical_groups (
                 group_id SERIAL PRIMARY KEY,
@@ -69,7 +68,7 @@ def create_tables():
                 zip TEXT
             )
         """)
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS hospitals (
                 hospital_id SERIAL PRIMARY KEY,
@@ -81,7 +80,7 @@ def create_tables():
                 zip TEXT
             )
         """)
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS networks (
                 network_id SERIAL PRIMARY KEY,
@@ -89,7 +88,7 @@ def create_tables():
                 name TEXT NOT NULL
             )
         """)
-        
+
         # Create relationship tables
         cur.execute("""
             CREATE TABLE IF NOT EXISTS individual_provider_medical_group (
@@ -102,7 +101,7 @@ def create_tables():
                 UNIQUE(provider_id, group_id)
             )
         """)
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS medical_group_hospital (
                 id SERIAL PRIMARY KEY,
@@ -112,7 +111,7 @@ def create_tables():
                 UNIQUE(group_id, hospital_id)
             )
         """)
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS hospital_network (
                 id SERIAL PRIMARY KEY,
@@ -123,7 +122,7 @@ def create_tables():
                 UNIQUE(hospital_id, network_id)
             )
         """)
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS medical_group_network (
                 id SERIAL PRIMARY KEY,
@@ -141,10 +140,14 @@ def create_tables():
                 queue_id SERIAL PRIMARY KEY,
                 provider_id INTEGER NOT NULL
                     REFERENCES individual_providers(provider_id) ON DELETE CASCADE,
-                issue_type VARCHAR(40) NOT NULL,
+                issue_type TEXT NOT NULL,
                 description TEXT NOT NULL,
+                action_type VARCHAR(20) NOT NULL DEFAULT 'update_field',
+                field_name TEXT,
+                new_value TEXT,
+                duplicate_ids INTEGER[],
                 recommended_action TEXT,
-                status VARCHAR(20) NOT NULL DEFAULT 'open',
+                status TEXT NOT NULL DEFAULT 'open',
                 assigned_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
                 created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -152,12 +155,12 @@ def create_tables():
                 resolved_at TIMESTAMP
             )
         """)
-        
+
         print("All tables created successfully!")
-        
+
     except Exception as e:
         print(f"An error occurred: {e}")
-        
+
     finally:
         cur.close()
         conn.close()
