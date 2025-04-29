@@ -11,9 +11,9 @@ def send_login_email(user, link):
         link: Generated login URL with token
     """
     msg = Message(
-        subject="Your magic login link",
+        subject="🪄 BCBS ID Providers - Login Link 🔗",
         recipients=[user.email],
-        body=f"Hello {user.first_name},\n\nClick to log in: {link}\n\nThis link expires in 24 hours.",
+        body=f"Hello {user.first_name},\n\nClick to log in to BCBS ID Provider Data Manager: {link}\n\nThis link expires in 24 hours.",
         sender=current_app.config["EMAILS_SENT_FROM"]
     )
     mail.send(msg)
