@@ -1,4 +1,3 @@
-
 from flask import Blueprint, request, url_for, jsonify, redirect, current_app, render_template
 from flask_login import login_user, logout_user, current_user
 from flask_mail import Message
@@ -12,10 +11,15 @@ def login():
     """Display login page"""
     return render_template('login.html')
 
-@bp.route('/logout-page')
-def logout_page():
-    """Display logout confirmation page"""
-    return render_template('logout.html')
+@bp.route('/logout', methods=['GET', 'POST'])
+def logout():
+    """Handle logout flow"""
+    if request.method == 'GET':
+        return render_template('logout.html')
+
+    logout_user()
+    return redirect(url_for('auth.login'))
+
 
 @login_mgr.user_loader
 def load_user(user_id):
@@ -26,11 +30,11 @@ def request_link():
     """Request a magic login link sent via email"""
     if not request.is_json:
         return {"error": "Expected JSON"}, 400
-        
+
     email = request.json.get("email", "").lower().strip()
     if not email:
         return {"error": "Email required"}, 400
-        
+
     user = User.query.filter_by(email=email).first()
     if not user:
         # Create new user if not found
@@ -45,7 +49,7 @@ def request_link():
     # Generate signed token with 24h expiry
     token = ts.dumps(email)
     login_link = url_for("auth.login_with_token", token=token, _external=True)
-    
+
     # Send email with magic link
     msg = Message(
         subject="Your magic login link",
@@ -54,7 +58,7 @@ def request_link():
         sender=current_app.config["MAIL_DEFAULT_SENDER"]
     )
     mail.send(msg)
-    
+
     return {"message": "Login link sent to your email"}, 202
 
 @bp.get("/login/<token>")
@@ -64,16 +68,10 @@ def login_with_token(token):
         email = ts.loads(token, max_age=24*3600)  # 24 hour expiry
     except:
         return {"error": "Invalid or expired login link"}, 400
-        
+
     user = User.query.filter_by(email=email).first()
     if not user:
         return {"error": "User not found"}, 404
-        
+
     login_user(user)
     return redirect("/")
-
-@bp.post("/logout") 
-def logout():
-    """Log current user out"""
-    logout_user()
-    return {"message": "Logged out successfully"}, 200
