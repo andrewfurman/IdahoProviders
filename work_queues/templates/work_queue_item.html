@@ -1,3 +1,4 @@
+
 {% extends "header.html" %}
 
 {% block content %}
@@ -7,21 +8,45 @@
   </nav>
 
   <div class="bg-white shadow rounded-lg p-6">
-    <!-- Header -->
+    <!-- Header with Status -->
     <div class="border-b pb-4 mb-6">
       <div class="flex justify-between items-start">
         <div>
           <h1 class="text-2xl font-bold mb-2">Work Item #{{ item.queue_id }}</h1>
           <p class="text-gray-600">Created {{ item.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</p>
         </div>
-        <div class="flex space-x-2">
-          {% if not item.assigned_user or item.assigned_user.id != current_user.id %}
-          <form method="POST" action="{{ url_for('work_queue.assign_to_me', queue_id=item.queue_id) }}">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-              Assign to me
-            </button>
-          </form>
-          {% endif %}
+        
+        <!-- Work Queue Status Box -->
+        <div class="bg-gray-50 p-4 rounded-lg w-64">
+          <h3 class="text-sm font-medium text-gray-700 mb-3">Work Queue Status</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-gray-500">Status</label>
+              <div class="mt-1">
+                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full
+                  {% if item.status == 'open' %}bg-red-100 text-red-800
+                  {% elif item.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                  {% else %}bg-green-100 text-green-800{% endif %}">
+                  {{ item.status.replace('_', ' ').title() }}
+                </span>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500">Assigned To</label>
+              <div class="mt-1 text-sm">
+                {{ item.assigned_user.email if item.assigned_user else '— Unassigned —' }}
+              </div>
+            </div>
+            {% if not item.assigned_user or item.assigned_user.id != current_user.id %}
+            <div class="pt-2">
+              <form method="POST" action="{{ url_for('work_queue.assign_to_me', queue_id=item.queue_id) }}">
+                <button type="submit" class="bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700">
+                  Assign to me
+                </button>
+              </form>
+            </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
@@ -87,23 +112,11 @@
           </div>
 
           <div>
-            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+            <label for="status" class="block text-sm font-medium text-gray-700">Update Status</label>
             <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
               <option value="open" {% if item.status == 'open' %}selected{% endif %}>Open</option>
               <option value="in_progress" {% if item.status == 'in_progress' %}selected{% endif %}>In Progress</option>
               <option value="resolved" {% if item.status == 'resolved' %}selected{% endif %}>Resolved</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="assigned_user_id" class="block text-sm font-medium text-gray-700">Assigned To</label>
-            <select id="assigned_user_id" name="assigned_user_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-              <option value="">— Unassigned —</option>
-              {% for u in users %}
-              <option value="{{ u.id }}" {% if item.assigned_user_id == u.id %}selected{% endif %}>
-                {{ u.email }}
-              </option>
-              {% endfor %}
             </select>
           </div>
 
@@ -115,40 +128,66 @@
         </form>
       </div>
 
-      <!-- Provider Details -->
+      <!-- Provider Information -->
       <div>
         <h2 class="text-lg font-semibold mb-4">Provider Information</h2>
-        <div class="bg-gray-50 p-4 rounded-lg">
-          <div class="mb-4">
-            <a href="{{ url_for('providers.provider_detail', provider_id=provider.provider_id) }}" 
-               class="text-blue-600 hover:text-blue-800 text-lg font-medium">
-              {{ provider.first_name }} {{ provider.last_name }}
-            </a>
-          </div>
-
-          <dl class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <div class="space-y-4">
+            <!-- Provider Name and Type -->
             <div>
-              <dt class="text-sm font-medium text-gray-500">NPI</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ provider.npi or '—' }}</dd>
+              <h3 class="text-xl font-medium text-gray-900">
+                {{ provider.first_name }} {{ provider.last_name }}
+              </h3>
+              <p class="text-gray-600">{{ provider.provider_type or '—' }}</p>
             </div>
 
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Provider Type</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ provider.provider_type or '—' }}</dd>
+            <!-- Core Information -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium text-gray-600">NPI</label>
+                <p class="mt-1">{{ provider.npi or '—' }}</p>
+              </div>
+              <div>
+                <label class="text-sm font-medium text-gray-600">Gender</label>
+                <p class="mt-1">{{ provider.gender or '—' }}</p>
+              </div>
             </div>
 
+            <!-- Contact Information -->
             <div>
-              <dt class="text-sm font-medium text-gray-500">Specialties</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ provider.specialties or '—' }}</dd>
+              <label class="text-sm font-medium text-gray-600">Phone</label>
+              <p class="mt-1">{{ provider.phone or '—' }}</p>
             </div>
-
             <div>
-              <dt class="text-sm font-medium text-gray-500">Location</dt>
-              <dd class="mt-1 text-sm text-gray-900">
+              <label class="text-sm font-medium text-gray-600">Address</label>
+              <p class="mt-1">
+                {% if provider.address_line %}
+                {{ provider.address_line }}<br>
                 {{ provider.city }}, {{ provider.state }} {{ provider.zip }}
-              </dd>
+                {% else %}
+                —
+                {% endif %}
+              </p>
             </div>
-          </dl>
+
+            <!-- Professional Details -->
+            <div>
+              <label class="text-sm font-medium text-gray-600">Specialties</label>
+              <p class="mt-1">{{ provider.specialties or '—' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Board Certifications</label>
+              <p class="mt-1">{{ provider.board_certifications or '—' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Languages</label>
+              <p class="mt-1">{{ provider.languages or '—' }}</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Accepting New Patients</label>
+              <p class="mt-1">{{ 'Yes' if provider.accepting_new_patients else 'No' }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
