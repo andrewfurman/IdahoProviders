@@ -49,7 +49,13 @@ def hospital_detail(hospital_id):
     hospital = db.session.query(Hospital).get(hospital_id)
     if hospital is None:
         abort(404)
-    return render_template('hospital_detail.html', hospital=hospital)
+    
+    networks = db.session.query(Network, HospitalNetwork)\
+        .join(HospitalNetwork, Network.network_id == HospitalNetwork.network_id)\
+        .filter(HospitalNetwork.hospital_id == hospital_id)\
+        .all()
+        
+    return render_template('hospital_detail.html', hospital=hospital, networks=networks)
 
 @providers_bp.route('/hospitals/<int:hospital_id>/update', methods=['POST'])
 def update_hospital(hospital_id):
