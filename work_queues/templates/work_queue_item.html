@@ -1,4 +1,3 @@
-
 {% extends "header.html" %}
 
 {% block content %}
@@ -42,9 +41,49 @@
             <div class="mt-1 text-gray-900">{{ item.description }}</div>
           </div>
 
-          <div>
-            <label for="recommended_action" class="block text-sm font-medium text-gray-700">Recommended Action</label>
-            <textarea id="recommended_action" name="recommended_action" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ item.recommended_action or '' }}</textarea>
+          <!-- Recommended Action Section -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-medium text-gray-900">Recommended Action</h3>
+
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="mb-4">
+                <span class="text-sm font-medium text-gray-500">Action Type:</span>
+                <span class="ml-2 text-sm text-gray-900">{{ item.action_type.replace('_', ' ').title() }}</span>
+              </div>
+
+              {% if item.action_type == 'update_field' and item.field_name %}
+              <div class="mb-4">
+                <span class="text-sm font-medium text-gray-500">Field to Update:</span>
+                <span class="ml-2 text-sm text-gray-900">{{ item.field_name }}</span>
+
+                <div class="mt-2">
+                  <span class="text-sm font-medium text-gray-500">New Value:</span>
+                  <span class="ml-2 text-sm text-gray-900">{{ item.new_value or '—' }}</span>
+                </div>
+              </div>
+              {% endif %}
+
+              {% if item.action_type == 'merge_duplicates' and item.duplicate_ids %}
+              <div class="mb-4">
+                <span class="text-sm font-medium text-gray-500">Duplicate Provider IDs:</span>
+                <div class="mt-1">
+                  {% for id in item.duplicate_ids %}
+                    <a href="{{ url_for('providers.provider_detail', provider_id=id) }}" 
+                       class="inline-block bg-blue-100 text-blue-700 px-2 py-1 rounded mr-2 mb-2 text-sm hover:bg-blue-200">
+                      #{{ id }}
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                <textarea name="recommended_action"
+                        class="w-full border rounded-md p-2"
+                        rows="3">{{ item.recommended_action or '' }}</textarea>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -86,13 +125,13 @@
               {{ provider.first_name }} {{ provider.last_name }}
             </a>
           </div>
-          
+
           <dl class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
             <div>
               <dt class="text-sm font-medium text-gray-500">NPI</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ provider.npi or '—' }}</dd>
             </div>
-            
+
             <div>
               <dt class="text-sm font-medium text-gray-500">Provider Type</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ provider.provider_type or '—' }}</dd>
