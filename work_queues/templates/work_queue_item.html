@@ -112,7 +112,10 @@
             <!-- Provider Name and Type -->
             <div>
               <h3 class="text-xl font-medium text-gray-900">
-                {{ provider.first_name }} {{ provider.last_name }}
+                <a href="{{ url_for('providers.provider_detail', provider_id=provider.provider_id) }}" 
+                   class="text-blue-600 hover:text-blue-800 hover:underline">
+                  {{ provider.first_name }} {{ provider.last_name }}
+                </a>
               </h3>
               <p class="text-gray-600">{{ provider.provider_type or '—' }}</p>
             </div>
