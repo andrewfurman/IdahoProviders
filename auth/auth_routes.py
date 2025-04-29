@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, jsonify, redirect, current_app, render_template
+from flask import Blueprint, request, url_for, jsonify, redirect, current_app, render_template, session
 from flask_login import login_user, logout_user, current_user
 from flask_mail import Message
 from main import db, mail, ts, login_mgr
@@ -18,6 +18,7 @@ def logout():
         return render_template('logout.html')
 
     logout_user()
+    session.clear()  # Clear all session data including flash messages
     return redirect(url_for('auth.login'))
 
 
