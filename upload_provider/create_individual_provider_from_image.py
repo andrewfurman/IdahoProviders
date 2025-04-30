@@ -26,8 +26,11 @@ def create_individual_provider_from_markdown(markdown_text: str) -> IndividualPr
     Returns:
         IndividualProvider: The newly created provider record
     """
+    # Get next provider_id
+    result = db.session.execute(db.text("SELECT nextval('individual_providers_provider_id_seq')"))
+    next_id = result.scalar()
 
-    # Create timestamp for the placeholder last name
+    # Create timestamp for the placeholder last name 
     current_time = datetime.now().strftime("%B %d, %Y at %I:%M %p")
 
     # Create new provider with required placeholder values

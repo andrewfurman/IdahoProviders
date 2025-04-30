@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, current_app
 from werkzeug.utils import secure_filename
 
 from .image_to_markdown_gpt import image_to_markdown  # local import
