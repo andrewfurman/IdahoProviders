@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, flash, current_app
 from werkzeug.utils import secure_filename
 
 from .image_to_markdown_gpt import image_to_markdown  # local import
+from .provider_to_facets import convert_and_save_provider_facets
 
 upload_provider_bp = Blueprint(
     "upload_provider",
@@ -35,6 +36,15 @@ def extract_provider_info(provider_id):
         return {"success": success}
     except Exception as err:
         current_app.logger.error(f"Error extracting provider info: {str(err)}")
+        return {"error": str(err)}, 500
+
+@upload_provider_bp.post("/convert_to_facets/<int:provider_id>")
+def convert_to_facets(provider_id):
+    try:
+        result = convert_and_save_provider_facets(provider_id)
+        return {"success": True, "result": result}
+    except Exception as err:
+        current_app.logger.error(f"Error converting to Facets: {str(err)}")
         return {"error": str(err)}, 500
 
 @upload_provider_bp.post("/create_provider")

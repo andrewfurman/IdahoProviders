@@ -95,7 +95,7 @@
                 <div class="col-span-3">
                     <h2 class="text-lg font-semibold mb-4 text-gray-700">Provider Form Data</h2>
                     <div class="space-y-3">
-                        
+
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
@@ -125,13 +125,35 @@
                                 alert('Error extracting provider info');
                             }
                         }
+                        async function convertToFacets(providerId) {
+                            try {
+                                const response = await fetch(`/upload_provider/convert_to_facets/${providerId}`, {
+                                    method: 'POST'
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Failed to convert to facets');
+                                }
+                            } catch (err) {
+                                console.error('Error:', err);
+                                alert('Error converting to facets');
+                            }
+                        }
                         </script>
                         <div>
                             <label class="text-gray-600 text-sm">Enrollment Form JSON</label>
                             <textarea name="provider_enrollment_form_json" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_enrollment_form_json }}</textarea>
                         </div>
                         <div>
-                            <label class="text-gray-600 text-sm">Provider Facets Tables</label>
+                            <div class="flex justify-between items-center mb-4">
+                                <label class="text-gray-600 text-sm">Provider Facets Tables</label>
+                                <button onclick="convertToFacets({{ provider.provider_id }})"
+                                        class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded">
+                                    🔄 Convert to Facets
+                                </button>
+                            </div>
                             <textarea name="provider_facets_tables" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_facets_tables }}</textarea>
                         </div>
                         <div>
