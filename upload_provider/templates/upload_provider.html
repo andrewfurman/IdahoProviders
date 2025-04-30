@@ -36,28 +36,10 @@
     {% if markdown %}
     <!-- Extraction results -->
     <div class="mt-10">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-xl font-semibold">Extracted Text</h2>
-        <button onclick="copyMarkdown()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
-          <span>📋 Copy Markdown</span>
-        </button>
-      </div>
+      <h2 class="text-xl font-semibold mb-2">Extracted Text</h2>
       <div id="markdown-content" class="prose max-w-none bg-gray-50 border rounded p-4 overflow-x-auto [&_table]:border-collapse [&_td]:border [&_th]:border [&_td]:p-2 [&_th]:p-2">
       </div>
     </div>
-    <script>
-      function copyMarkdown(event) {
-        const markdownText = {{ markdown|tojson|safe }};
-        navigator.clipboard.writeText(markdownText).then(() => {
-          const btn = event.currentTarget;
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '<span>✅ Copied!</span>';
-          setTimeout(() => {
-            btn.innerHTML = originalText;
-          }, 2000);
-        });
-      }
-    </script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         const markdownContent = document.createElement('div');

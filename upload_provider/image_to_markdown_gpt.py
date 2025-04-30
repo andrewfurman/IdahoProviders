@@ -31,7 +31,7 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
     data_url = _encode_image(file_storage)
 
     response = client.chat.completions.create(
-        model="gpt-4.1-mini",  # any vision-capable model is fine
+        model="gpt-4.1",  # any vision-capable model is fine
         messages=[
             {
                 "role": "user",
@@ -39,7 +39,7 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
                     {
                         "type": "text",
                         "text": (
-                            "Transcribe every piece of text in this image, "
+                            "Transcribe every piece of text in this image, and make sure to correct any spelling errors (do not change spelling of names or places or any other proper nouns)."
                             "re-create the layout in Markdown. "
                             "Preserve headings, tables, and structure of the document."
                         ),
