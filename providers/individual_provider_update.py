@@ -37,7 +37,12 @@ def update_individual_provider(provider_id):
         'address_line': 'Address',
         'city': 'City',
         'state': 'State',
-        'zip': 'ZIP'
+        'zip': 'ZIP',
+        'provider_enrollment_form_image': 'Enrollment Form Image',
+        'provider_enrollment_form_markdown_text': 'Enrollment Form Markdown',
+        'provider_enrollment_form_json': 'Enrollment Form JSON',
+        'provider_facets_tables': 'Provider Facets Tables',
+        'provider_facets_markdown': 'Provider Facets Markdown'
     }
     
     try:
