@@ -71,7 +71,7 @@ app.register_blueprint(upload_provider_bp)
 
 @app.route("/")
 def index():
-    return redirect(url_for("providers.providers"))
+    return redirect(url_for("upload_provider.upload"))
 
 # ────────────────────────────────────────────────────────────────
 # Entrypoint
