@@ -3,7 +3,9 @@ from main import db
 from models import IndividualProvider, MedicalGroup, Hospital, Network, ProviderGroup, HospitalNetwork
 
 
-providers_bp = Blueprint('providers', __name__, template_folder='templates')
+providers_bp = Blueprint('providers', __name__, 
+                        template_folder='templates',
+                        static_folder='static')
 
 @providers_bp.route('/individual_providers/<int:provider_id>')
 def provider_detail(provider_id):
