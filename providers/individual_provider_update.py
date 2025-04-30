@@ -101,7 +101,20 @@ def update_individual_provider(provider_id):
         logger.debug("Applying field updates")
         for field, value, is_boolean in field_updates:
             logger.debug(f"Updating {field} to {value}")
-            if is_boolean:
+            if field == 'provider_enrollment_form_image' and value:
+                # Convert string to binary
+                setattr(provider, field, value.encode('utf-8'))
+            elif field in ['provider_enrollment_form_json', 'provider_facets_tables'] and value:
+                # Handle JSON fields
+                import json
+                try:
+                    json_value = json.loads(value)
+                    setattr(provider, field, json_value)
+                except json.JSONDecodeError:
+                    logger.error(f"Invalid JSON for field {field}")
+                    flash(f'Invalid JSON in {fields_to_track[field]}')
+                    return redirect(url_for('providers.provider_detail', provider_id=provider_id))
+            elif is_boolean:
                 setattr(provider, field, value == 'true')
             else:
                 setattr(provider, field, value)
