@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let timerInterval;
 
   function showLoading() {
+    const originalText = submitButton.innerHTML;
     submitButton.disabled = true;
     
     // Create loading container
@@ -37,56 +38,21 @@ document.addEventListener('DOMContentLoaded', function() {
     elapsedTime = 0;
   }
 
-  uploadForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
+  uploadForm.addEventListener('submit', function() {
     showLoading();
-
-    const formData = new FormData(this);
-    try {
-      const response = await fetch(this.action, {
-        method: 'POST',
-        body: formData
-      });
-      
-      const html = await response.text();
-      
-      // Extract the markdown content div from response
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const markdownContent = doc.getElementById('markdown-content');
-      
-      if (markdownContent) {
-        // Update just the markdown section
-        const currentMarkdownContent = document.getElementById('markdown-content');
-        if (currentMarkdownContent) {
-          const markdown = markdownContent.getAttribute('data-markdown');
-          if (markdown) {
-            currentMarkdownContent.setAttribute('data-markdown', markdown);
-            currentMarkdownContent.querySelector('#markdown-rendered').innerHTML = marked.parse(markdown);
-          }
-        } else {
-          // If first time, create the results section
-          const resultsDiv = document.createElement('div');
-          resultsDiv.className = 'mt-10';
-          resultsDiv.innerHTML = `
-            <h2 class="text-xl font-semibold mb-2">🔤 Extracted Text</h2>
-            <div id="markdown-content" class="prose max-w-none bg-gray-50 border rounded p-4 overflow-x-auto">
-              <div id="markdown-rendered"></div>
-            </div>
-          `;
-          uploadForm.parentNode.appendChild(resultsDiv);
-          
-          const markdown = markdownContent.getAttribute('data-markdown');
-          if (markdown) {
-            resultsDiv.querySelector('#markdown-content').setAttribute('data-markdown', markdown);
-            resultsDiv.querySelector('#markdown-rendered').innerHTML = marked.parse(markdown);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      hideLoading();
-    }
   });
+
+  // Handle response completion
+  const originalFetch = window.fetch;
+  window.fetch = function() {
+    return originalFetch.apply(this, arguments)
+      .then(response => {
+        hideLoading();
+        return response;
+      })
+      .catch(error => {
+        hideLoading();
+        throw error;
+      });
+  };
 });
