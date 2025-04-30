@@ -38,3 +38,7 @@ async function convertToFacets(providerId) {
         alert('Error converting to Facets');
     }
 }
+
+// Make functions available globally
+window.extractProviderInfo = extractProviderInfo;
+window.convertToFacets = convertToFacets;
