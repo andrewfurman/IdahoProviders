@@ -27,6 +27,16 @@ def process_image():
     except Exception as err:
         return {"error": str(err)}, 500
 
+@upload_provider_bp.post("/extract_provider_info/<int:provider_id>")
+def extract_provider_info(provider_id):
+    try:
+        from .markdown_to_individual_provider_gpt import markdown_to_individual_provider_gpt
+        success = markdown_to_individual_provider_gpt(provider_id)
+        return {"success": success}
+    except Exception as err:
+        current_app.logger.error(f"Error extracting provider info: {str(err)}")
+        return {"error": str(err)}, 500
+
 @upload_provider_bp.post("/create_provider")
 def create_provider():
     markdown_text = request.form.get("markdown_text")

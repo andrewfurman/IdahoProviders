@@ -97,9 +97,35 @@
                     <div class="space-y-3">
                         
                         <div>
-                            <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
+                                <button type="button" 
+                                        onclick="extractProviderInfo({{ provider.provider_id }})"
+                                        class="text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded">
+                                    ✨ Extract Provider Info from Form Text
+                                </button>
+                            </div>
                             <textarea name="provider_enrollment_form_markdown_text" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_markdown_text or '' }}</textarea>
                         </div>
+
+                        <script>
+                        async function extractProviderInfo(providerId) {
+                            try {
+                                const response = await fetch(`/upload/extract_provider_info/${providerId}`, {
+                                    method: 'POST'
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                    location.reload();
+                                } else {
+                                    alert('Failed to extract provider info');
+                                }
+                            } catch (err) {
+                                console.error('Error:', err);
+                                alert('Error extracting provider info');
+                            }
+                        }
+                        </script>
                         <div>
                             <label class="text-gray-600 text-sm">Enrollment Form JSON</label>
                             <textarea name="provider_enrollment_form_json" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_enrollment_form_json }}</textarea>
