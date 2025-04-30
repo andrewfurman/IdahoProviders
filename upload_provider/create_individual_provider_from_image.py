@@ -22,8 +22,11 @@ def create_individual_provider_from_markdown(markdown_text: str, image_file) -> 
     # Create timestamp for the placeholder last name 
     current_time = datetime.now().strftime("%B %d, %Y at %I:%M %p")
 
-    # Read image file bytes
-    image_bytes = image_file.read() if image_file else None
+    # Convert image to base64 for storage
+    import base64
+    image_bytes = None
+    if image_file:
+        image_bytes = base64.b64encode(image_file.read())
 
     # Create new provider with required placeholder values
     new_provider = IndividualProvider(
