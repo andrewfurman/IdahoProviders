@@ -38,7 +38,11 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify({ markdown_text: markdown })
       });
       
-      if (!providerResponse.ok) throw new Error('Provider creation failed');
+      if (!providerResponse.ok) {
+        const errorData = await providerResponse.text();
+        console.error('Provider creation failed:', errorData);
+        throw new Error(`Provider creation failed: ${errorData}`);
+      }
       
       const { provider_id } = await providerResponse.json();
       

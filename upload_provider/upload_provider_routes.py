@@ -35,7 +35,19 @@ def create_provider():
 
     try:
         from .create_individual_provider_from_image import create_individual_provider_from_markdown
+        if not markdown_text:
+            current_app.logger.error("No markdown text provided")
+            return "No markdown text provided", 500
+            
         provider = create_individual_provider_from_markdown(markdown_text)
+        if not provider:
+            current_app.logger.error("Provider creation returned None")
+            return "Provider creation failed - no provider returned", 500
+            
+        current_app.logger.info(f"Provider created successfully with ID: {provider.provider_id}")
         return {"provider_id": provider.provider_id}
     except Exception as err:
-        return {"error": str(err)}, 500
+        import traceback
+        current_app.logger.error(f"Error creating provider: {str(err)}")
+        current_app.logger.error(f"Traceback: {traceback.format_exc()}")
+        return str(err), 500
