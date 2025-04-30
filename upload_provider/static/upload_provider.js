@@ -4,13 +4,22 @@ document.addEventListener('DOMContentLoaded', function() {
   const processingStatus = document.getElementById('processingStatus');
   const extractionResults = document.getElementById('extractionResults');
   const markdownContent = document.getElementById('markdownContent');
+  let processingTimer;
+  let processingSeconds = 0;
 
   uploadForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    // Show processing status
+    // Show processing status and start timer
     processingStatus.classList.remove('hidden');
     extractionResults.classList.add('hidden');
+    processingSeconds = 0;
+    
+    const statusText = processingStatus.querySelector('p');
+    processingTimer = setInterval(() => {
+      processingSeconds++;
+      statusText.textContent = `Processing image... (${processingSeconds} second${processingSeconds !== 1 ? 's' : ''})`;
+    }, 1000);
     
     try {
       // First process the image
@@ -57,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Error:', error);
       alert('An error occurred while processing the request');
     } finally {
+      clearInterval(processingTimer);
       processingStatus.classList.add('hidden');
     }
   });
