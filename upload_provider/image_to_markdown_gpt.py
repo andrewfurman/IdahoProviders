@@ -1,4 +1,3 @@
-# This function will intake an image and then it will send the image file to the ChatGPT API and then request that this ChatGPT API call return a markdown text that reflects all of the content of the image transcribed and structured just as the content is structured in the image or as close as possible to it.  So make sure to preserve any tables in markdown, make sure to preserve any header information or footer information and format it in markdown accordingly so that the markdown file maintains the same general structure as the image.  It doesn't need to be exact but just needs to be general.
 
 """
 Utility: convert an uploaded image (Werkzeug FileStorage) to
@@ -10,10 +9,9 @@ Environment:
 
 import base64
 from typing import Union, IO
-
 from openai import OpenAI
 
-client = OpenAI()          # uses OPENAI_API_KEY from env
+client = OpenAI()
 
 def _encode_image(file_obj: Union[IO[bytes], "FileStorage"]) -> str:
     """
@@ -29,6 +27,26 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
     Send the image to the model and return the Markdown transcription.
     """
     data_url = _encode_image(file_storage)
+
+    tools = [{
+        "type": "function",
+        "function": {
+            "name": "transcribe_image",
+            "description": "Transcribe text from an image into GitHub-flavoured Markdown format",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "markdown_text": {
+                        "type": "string",
+                        "description": "The markdown formatted text transcribed from the image"
+                    }
+                },
+                "required": ["markdown_text"],
+                "additionalProperties": False
+            },
+            "strict": True
+        }
+    }]
 
     response = client.chat.completions.create(
         model="gpt-4.1-mini",  # any vision-capable model is fine
@@ -50,7 +68,11 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
                     },
                 ],
             }
-        ]
+        ],
+        tools=tools,
+        tool_choice={"type": "function", "function": {"name": "transcribe_image"}}
     )
 
-    return response.choices[0].message.content.strip()
+    # Extract markdown text from function call
+    tool_call = response.choices[0].message.tool_calls[0]
+    return tool_call.function.arguments.strip('{}"\n').replace('"markdown_text":', '')
