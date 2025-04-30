@@ -59,7 +59,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update just the markdown section
         const currentMarkdownContent = document.getElementById('markdown-content');
         if (currentMarkdownContent) {
-          currentMarkdownContent.innerHTML = markdownContent.innerHTML;
+          const markdown = markdownContent.getAttribute('data-markdown');
+          if (markdown) {
+            currentMarkdownContent.setAttribute('data-markdown', markdown);
+            currentMarkdownContent.querySelector('#markdown-rendered').innerHTML = marked.parse(markdown);
+          }
         } else {
           // If first time, create the results section
           const resultsDiv = document.createElement('div');
@@ -67,10 +71,16 @@ document.addEventListener('DOMContentLoaded', function() {
           resultsDiv.innerHTML = `
             <h2 class="text-xl font-semibold mb-2">🔤 Extracted Text</h2>
             <div id="markdown-content" class="prose max-w-none bg-gray-50 border rounded p-4 overflow-x-auto">
-              ${markdownContent.innerHTML}
+              <div id="markdown-rendered"></div>
             </div>
           `;
           uploadForm.parentNode.appendChild(resultsDiv);
+          
+          const markdown = markdownContent.getAttribute('data-markdown');
+          if (markdown) {
+            resultsDiv.querySelector('#markdown-content').setAttribute('data-markdown', markdown);
+            resultsDiv.querySelector('#markdown-rendered').innerHTML = marked.parse(markdown);
+          }
         }
       }
     } catch (error) {
