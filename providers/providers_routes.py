@@ -28,7 +28,6 @@ def medical_groups():
     groups = db.session.query(MedicalGroup).order_by(MedicalGroup.group_id).all()
     return render_template('medical_groups.html', medical_groups=groups)
 
-@providers_bp.route('/')
 @providers_bp.route('/individual_providers')
 def providers():
     providers = db.session.query(IndividualProvider).all()
