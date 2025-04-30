@@ -33,7 +33,7 @@ async function convertToFacets(providerId) {
 
 async function extractProviderInfo(providerId) {
     try {
-        const response = await fetch(`/upload/extract_provider_info/${providerId}`, {
+        const response = await fetch(`/upload_provider/extract_provider_info/${providerId}`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json'
