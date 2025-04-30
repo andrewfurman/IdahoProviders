@@ -37,32 +37,37 @@ def markdown_to_individual_provider_gpt(provider_id: int) -> bool:
             messages=[
                 {
                     "role": "system",
-                    "content": """Extract provider information from the markdown text into a JSON object with these fields:
-                        - npi (string): National Provider Identifier
-                        - first_name (string): Provider's first name
-                        - last_name (string): Provider's last name
-                        - gender (string): Provider's gender (M/F)
-                        - phone (string): Contact phone number
-                        - provider_type (string): Type of provider
-                        - accepting_new_patients (boolean): Whether accepting new patients
-                        - specialties (string): Medical specialties
-                        - board_certifications (string): Board certifications
-                        - languages (string): Languages spoken
-                        - address_line (string): Street address
-                        - city (string): City
-                        - state (string): State
-                        - zip (string): ZIP code"""
+                    "content": """Extract provider information and return a valid JSON object with these fields:
+                        {
+                          "npi": "string - National Provider Identifier",
+                          "first_name": "string - Provider's first name",
+                          "last_name": "string - Provider's last name",
+                          "gender": "string - Provider's gender (M/F)",
+                          "phone": "string - Contact phone number",
+                          "provider_type": "string - Type of provider",
+                          "accepting_new_patients": "boolean - Whether accepting new patients",
+                          "specialties": "string - Medical specialties",
+                          "board_certifications": "string - Board certifications", 
+                          "languages": "string - Languages spoken",
+                          "address_line": "string - Street address",
+                          "city": "string - City",
+                          "state": "string - State", 
+                          "zip": "string - ZIP code"
+                        }"""
                 },
                 {
-                    "role": "user", 
+                    "role": "user",
                     "content": provider.provider_enrollment_form_markdown_text
                 }
-            ],
-            response_format={"type": "json_object"}
+            ]
         )
 
-        # Parse GPT response
-        provider_data = json.loads(response.choices[0].message.content)
+        # Parse GPT response, handling potential JSON parsing errors
+        try:
+            provider_data = json.loads(response.choices[0].message.content)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse GPT response as JSON: {str(e)}")
+            return False
         
         # Simulate form submission by creating a request context
         from flask import Request, request
