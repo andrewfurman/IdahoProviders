@@ -1,0 +1,1 @@
+# This function will intake the database ID for a provider record and will then extract the nessisary fields for the provider record and call the individual_provider_update.py function to update the provider record with the new information.
