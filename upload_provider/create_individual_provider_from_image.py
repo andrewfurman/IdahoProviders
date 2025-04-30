@@ -28,7 +28,7 @@ def create_individual_provider_from_markdown(markdown_text: str) -> IndividualPr
     """
 
     # Create timestamp for the placeholder last name
-    current_time = datetime.now().strftime("%I:%M %p on %B %d, %Y")
+    current_time = datetime.now().strftime("%B %d, %Y at %I:%M %p")
 
     # Create new provider with required placeholder values
     new_provider = IndividualProvider(
