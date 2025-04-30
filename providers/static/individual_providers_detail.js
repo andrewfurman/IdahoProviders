@@ -30,3 +30,23 @@ async function convertToFacets(providerId) {
         alert(`Error converting to Facets: ${err.message}`);
     }
 }
+
+async function extractProviderInfo(providerId) {
+    try {
+        const response = await fetch(`/upload/extract_provider_info/${providerId}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Failed to extract provider info');
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        alert('Error extracting provider info');
+    }
+}
