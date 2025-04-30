@@ -1,6 +1,8 @@
+
 {% extends "header.html" %}
 
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="{{ url_for('upload_provider.static', filename='upload_provider.js') }}"></script>
 <div class="py-8 px-6">
   <div class="bg-white shadow rounded-lg p-6 max-w-4xl mx-auto">
@@ -35,9 +37,10 @@
     <!-- Extraction results -->
     <div class="mt-10">
       <h2 class="text-xl font-semibold mb-2">🔤 Extracted Text</h2>
-      <pre class="whitespace-pre-wrap bg-gray-50 border rounded p-4 overflow-x-auto">
-{{ markdown }}
-      </pre>
+      <div id="markdown-content" class="prose max-w-none bg-gray-50 border rounded p-4 overflow-x-auto"></div>
+      <script>
+        document.getElementById('markdown-content').innerHTML = marked.parse(`{{ markdown | safe }}`);
+      </script>
     </div>
     {% endif %}
 
