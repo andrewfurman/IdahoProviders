@@ -41,11 +41,15 @@ def extract_provider_info(provider_id):
 @upload_provider_bp.post("/convert_to_facets/<int:provider_id>")
 def convert_to_facets(provider_id):
     try:
+        current_app.logger.debug(f"Starting Facets conversion for provider {provider_id}")
         result = convert_and_save_provider_facets(provider_id)
+        current_app.logger.debug(f"Conversion result: {result}")
         return {"success": True, "result": result}
     except Exception as err:
+        import traceback
         current_app.logger.error(f"Error converting to Facets: {str(err)}")
-        return {"error": str(err)}, 500
+        current_app.logger.error(f"Traceback: {traceback.format_exc()}")
+        return {"error": str(err), "details": traceback.format_exc()}, 500
 
 @upload_provider_bp.post("/create_provider")
 def create_provider():
