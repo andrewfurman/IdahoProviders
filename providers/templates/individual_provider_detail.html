@@ -100,7 +100,7 @@
                             <label class="text-gray-600 text-sm">Enrollment Form Image</label>
                             {% if provider.provider_enrollment_form_image %}
                                 <div class="mt-2 mb-4">
-                                    <img src="data:image/png;base64,{{ provider.provider_enrollment_form_image.decode('utf-8') }}" 
+                                    <img src="data:image/png;base64,{{ provider.provider_enrollment_form_image }}" 
                                          alt="Provider Enrollment Form" 
                                          class="max-w-full h-auto border rounded-lg shadow-sm"/>
                                 </div>
