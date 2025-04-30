@@ -51,6 +51,10 @@ def update_individual_provider(provider_id):
         logger.debug("Checking for field changes...")
         # First pass - collect all changes
         for field, display_name in fields_to_track.items():
+            # Skip image field since it's handled separately
+            if field == 'provider_enrollment_form_image':
+                continue
+                
             old_value = str(getattr(provider, field))
             new_value = str(request.form.get(field))
 
