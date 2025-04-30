@@ -40,8 +40,8 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
                         "type": "text",
                         "text": (
                             "Transcribe every piece of text in this image, "
-                            "re-create the layout in GitHub-flavoured Markdown. "
-                            "Preserve tables, headings, and any obvious structure."
+                            "re-create the layout in Markdown. "
+                            "Preserve headings, tables, and structure of the document."
                         ),
                     },
                     {
