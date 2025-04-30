@@ -46,10 +46,10 @@
       </div>
     </div>
     <script>
-      function copyMarkdown() {
+      function copyMarkdown(event) {
         const markdownText = {{ markdown|tojson|safe }};
         navigator.clipboard.writeText(markdownText).then(() => {
-          const btn = event.target.closest('button');
+          const btn = event.currentTarget;
           const originalText = btn.innerHTML;
           btn.innerHTML = '<span>✅ Copied!</span>';
           setTimeout(() => {
