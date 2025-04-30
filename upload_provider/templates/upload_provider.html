@@ -42,7 +42,7 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const content = `{{ markdown|safe }}`;
+        const content = {{ markdown|tojson|safe }};
         const formattedContent = marked.parse(content);
         document.getElementById('markdown-content').innerHTML = formattedContent;
       });
