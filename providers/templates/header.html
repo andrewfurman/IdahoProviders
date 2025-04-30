@@ -20,6 +20,7 @@
                 </div>
                 <div class="border-l border-white-200 h-6"></div>
                 <a href="{{ url_for('work_queue.work_queue') }}" class="text-white hover:text-blue-200">⚠️ Queue</a>
+                <a href="{{ url_for('upload_provider.upload') }}" class="text-white hover:text-blue-200">📨 Upload</a>
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('auth.logout') }}" class="bg-blue-800 hover:bg-blue-700 text-white px-4 py-2 rounded">👤 Logout</a>
                 {% else %}
