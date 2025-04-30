@@ -91,6 +91,33 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Provider Form Data -->
+                <div class="col-span-3">
+                    <h2 class="text-lg font-semibold mb-4 text-gray-700">Provider Form Data</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-gray-600 text-sm">Enrollment Form Image</label>
+                            <textarea name="provider_enrollment_form_image" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_image or '' }}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
+                            <textarea name="provider_enrollment_form_markdown_text" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_markdown_text or '' }}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Enrollment Form JSON</label>
+                            <textarea name="provider_enrollment_form_json" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_json|tojson if provider.provider_enrollment_form_json else '' }}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Provider Facets Tables</label>
+                            <textarea name="provider_facets_tables" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_facets_tables|tojson if provider.provider_facets_tables else '' }}</textarea>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Provider Facets Markdown</label>
+                            <textarea name="provider_facets_markdown" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_facets_markdown or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
 
