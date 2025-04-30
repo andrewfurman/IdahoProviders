@@ -18,11 +18,11 @@ class IndividualProvider(db.Model):
     city = db.Column(db.Text)
     state = db.Column(db.Text)
     zip = db.Column(db.Text)
-    # provder_enrollment_form_image BYTEA
-    # provider_enrollment_form_markdown_text Text
-    # provider_enrollment_form_json JSONB
-    # provider_facets_tables JSONB
-    # provider_facets_markdown text
+    provider_enrollment_form_image = db.Column(db.LargeBinary)  # BYTEA in PostgreSQL
+    provider_enrollment_form_markdown_text = db.Column(db.Text)
+    provider_enrollment_form_json = db.Column(db.JSON)  # JSONB in PostgreSQL
+    provider_facets_tables = db.Column(db.JSON)  # JSONB in PostgreSQL
+    provider_facets_markdown = db.Column(db.Text)
 
     def to_dict(self):
         """
