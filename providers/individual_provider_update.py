@@ -107,16 +107,9 @@ def update_individual_provider(provider_id):
                     setattr(provider, field, value.strip().encode('utf-8'))
                 else:
                     setattr(provider, field, None)
-            elif field in ['provider_enrollment_form_json', 'provider_facets_tables'] and value:
-                # Handle JSON fields
-                import json
-                try:
-                    json_value = json.loads(value)
-                    setattr(provider, field, json_value)
-                except json.JSONDecodeError:
-                    logger.error(f"Invalid JSON for field {field}")
-                    flash(f'Invalid JSON in {fields_to_track[field]}')
-                    return redirect(url_for('providers.provider_detail', provider_id=provider_id))
+            elif field in ['provider_enrollment_form_json', 'provider_facets_tables']:
+                # Store JSON as is
+                setattr(provider, field, value if value else None)
             elif is_boolean:
                 setattr(provider, field, value == 'true')
             else:
