@@ -5,18 +5,20 @@ async function convertToFacets(providerId) {
         });
         
         const data = await response.json();
+        console.log('Server response:', data);
         
         if (!response.ok) {
-            throw new Error(data.error || 'Failed to convert to Facets');
+            throw new Error(data.error || data.details || 'Failed to convert to Facets');
         }
         
         if (data.success) {
             location.reload();
         } else {
-            throw new Error(data.error || 'Unknown error occurred');
+            throw new Error(data.error || data.details || 'Unknown error occurred');
         }
     } catch (err) {
         console.error('Conversion Error:', err);
-        alert(`Error converting to Facets: ${err.message}`);
+        console.error('Full error details:', err.stack);
+        alert(`Error converting to Facets: ${err.message}\nCheck browser console for details`);
     }
 }
