@@ -62,4 +62,34 @@ def create_provider():
         current_app.logger.error(f"Traceback: {traceback.format_exc()}")
         return str(err), 500
 
-# New Endpoint that calls both provider_to_facets and facets_json_to_markdown. Make sure to call the functions in the correct order and dont call facets_json_to_markdown if provider_to_facets fails (need to wait until the facets JSON is generated before generating the markdown))
+@upload_provider_bp.post("/convert_to_facets/<int:provider_id>")
+def convert_to_facets(provider_id):
+    """Convert provider data to Facets JSON and generate markdown summary."""
+    try:
+        # First generate Facets JSON
+        from .provider_to_facets import convert_and_save_provider_facets
+        facets_result = convert_and_save_provider_facets(provider_id)
+        
+        if facets_result.get('status') != 'success':
+            return {
+                'success': False, 
+                'error': 'Failed to generate Facets JSON',
+                'details': facets_result.get('message')
+            }
+
+        # Then generate markdown if JSON was successful
+        from .facets_json_to_markdown import convert_facets_json_to_markdown
+        markdown_result = convert_facets_json_to_markdown(provider_id)
+        
+        if markdown_result.get('status') != 'success':
+            return {
+                'success': False,
+                'error': 'Failed to generate Facets markdown',
+                'details': markdown_result.get('message')
+            }
+
+        return {'success': True}
+
+    except Exception as err:
+        current_app.logger.error(f"Error converting to Facets: {str(err)}")
+        return {'success': False, 'error': str(err)}
