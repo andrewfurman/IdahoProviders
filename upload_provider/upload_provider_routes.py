@@ -29,17 +29,16 @@ def process_image():
 
 @upload_provider_bp.post("/create_provider")
 def create_provider():
-    markdown_text = request.json.get("markdown_text")
+    markdown_text = request.form.get("markdown_text")
+    image_file = request.files.get("image_file")
+    
     if not markdown_text:
         return {"error": "No markdown text provided"}, 400
 
     try:
         from .create_individual_provider_from_image import create_individual_provider_from_markdown
-        if not markdown_text:
-            current_app.logger.error("No markdown text provided")
-            return "No markdown text provided", 500
-            
-        provider = create_individual_provider_from_markdown(markdown_text)
+        
+        provider = create_individual_provider_from_markdown(markdown_text, image_file)
         if not provider:
             current_app.logger.error("Provider creation returned None")
             return "Provider creation failed - no provider returned", 500

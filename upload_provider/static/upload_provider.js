@@ -37,14 +37,15 @@ document.addEventListener('DOMContentLoaded', function() {
       markdownContent.innerHTML = marked.parse(markdown);
       extractionResults.classList.remove('hidden');
       
-      // Create provider record
+      // Create provider record with both markdown and image
       const createProviderUrl = uploadForm.dataset.createProviderUrl;
+      const formData = new FormData();
+      formData.append('markdown_text', markdown);
+      formData.append('image_file', document.querySelector('input[name="image_file"]').files[0]);
+      
       const providerResponse = await fetch(createProviderUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ markdown_text: markdown })
+        body: formData
       });
       
       if (!providerResponse.ok) {
