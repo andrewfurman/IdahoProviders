@@ -1,4 +1,3 @@
-# This function will intake an image and then it will send the image file to the ChatGPT API and then request that this ChatGPT API call return a markdown text that reflects all of the content of the image transcribed and structured just as the content is structured in the image or as close as possible to it.  So make sure to preserve any tables in markdown, make sure to preserve any header information or footer information and format it in markdown accordingly so that the markdown file maintains the same general structure as the image.  It doesn't need to be exact but just needs to be general.
 
 """
 Utility: convert an uploaded image (Werkzeug FileStorage) to
@@ -10,10 +9,9 @@ Environment:
 
 import base64
 from typing import Union, IO
-
 from openai import OpenAI
 
-client = OpenAI()          # uses OPENAI_API_KEY from env
+client = OpenAI(timeout=60.0)          # uses OPENAI_API_KEY from env, 60 second timeout
 
 def _encode_image(file_obj: Union[IO[bytes], "FileStorage"]) -> str:
     """
