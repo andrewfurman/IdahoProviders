@@ -42,14 +42,19 @@ def extract_provider_info(provider_id):
 def convert_to_facets(provider_id):
     try:
         current_app.logger.debug(f"Starting Facets conversion for provider {provider_id}")
-        result = convert_and_save_provider_facets(provider_id)
+        from flask_login import current_user
+        result = convert_and_save_provider_facets(provider_id, current_user)
         current_app.logger.debug(f"Conversion result: {result}")
-        return {"success": True, "result": result}
+        if isinstance(result, dict) and result.get('status') == 'success':
+            return {"success": True, "result": result}
+        else:
+            return {"error": "Failed to convert provider", "details": str(result)}, 400
     except Exception as err:
         import traceback
+        error_details = traceback.format_exc()
         current_app.logger.error(f"Error converting to Facets: {str(err)}")
-        current_app.logger.error(f"Traceback: {traceback.format_exc()}")
-        return {"error": str(err), "details": traceback.format_exc()}, 500
+        current_app.logger.error(f"Traceback: {error_details}")
+        return {"error": str(err), "details": error_details}, 500
 
 @upload_provider_bp.post("/create_provider")
 def create_provider():

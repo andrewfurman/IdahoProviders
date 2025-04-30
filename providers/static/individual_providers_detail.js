@@ -18,7 +18,14 @@ async function convertToFacets(providerId) {
         }
     } catch (err) {
         console.error('Conversion Error:', err);
-        console.error('Full error details:', err.stack);
-        alert(`Error converting to Facets: ${err.message}\nCheck browser console for details`);
+        let errorMessage = 'Error converting to Facets';
+        if (data && (data.error || data.details)) {
+            errorMessage += '\n' + (data.error || '') + '\n' + (data.details || '');
+            console.error('Server error details:', data);
+        } else {
+            console.error('Full error details:', err.stack);
+            errorMessage += ': ' + err.message;
+        }
+        alert(errorMessage);
     }
 }
