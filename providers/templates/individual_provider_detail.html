@@ -1,4 +1,3 @@
-
 {% extends "header.html" %}
 
 {% block content %}
@@ -105,7 +104,7 @@
                                          class="max-w-full h-auto border rounded-lg shadow-sm"/>
                                 </div>
                             {% endif %}
-                            <textarea name="provider_enrollment_form_image" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_enrollment_form_image.decode('utf-8') if provider.provider_enrollment_form_image else '' }}</textarea>
+                            <textarea name="provider_enrollment_form_image" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_enrollment_form_image if provider.provider_enrollment_form_image else '' }}</textarea>
                         </div>
                         <div>
                             <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
