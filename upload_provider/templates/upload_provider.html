@@ -42,8 +42,9 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const content = {{ markdown|tojson|safe }};
-        const formattedContent = marked.parse(content);
+        const markdownContent = document.createElement('div');
+        markdownContent.textContent = {{ markdown|tojson|safe }};
+        const formattedContent = marked.parse(markdownContent.textContent);
         document.getElementById('markdown-content').innerHTML = formattedContent;
       });
     </script>
