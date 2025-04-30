@@ -8,7 +8,10 @@ async function convertToFacets(providerId) {
         console.log('Server response:', data);
         
         if (!response.ok) {
-            throw new Error(data.error || data.details || 'Failed to convert to Facets');
+            let errorMsg = 'Failed to convert to Facets\n\n';
+            if (data.error) errorMsg += `Error: ${data.error}\n`;
+            if (data.details) errorMsg += `Details: ${data.details}`;
+            throw new Error(errorMsg);
         }
         
         if (data.success) {
@@ -18,14 +21,7 @@ async function convertToFacets(providerId) {
         }
     } catch (err) {
         console.error('Conversion Error:', err);
-        let errorMessage = 'Error converting to Facets';
-        if (data && (data.error || data.details)) {
-            errorMessage += '\n' + (data.error || '') + '\n' + (data.details || '');
-            console.error('Server error details:', data);
-        } else {
-            console.error('Full error details:', err.stack);
-            errorMessage += ': ' + err.message;
-        }
-        alert(errorMessage);
+        console.error('Error stack:', err.stack);
+        alert(err.message || 'Error converting to Facets');
     }
 }

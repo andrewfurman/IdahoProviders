@@ -43,12 +43,28 @@ def convert_to_facets(provider_id):
     try:
         current_app.logger.debug(f"Starting Facets conversion for provider {provider_id}")
         from flask_login import current_user
+        
+        # Import here to avoid circular imports
+        from models.provider import IndividualProvider
+        provider = IndividualProvider.query.get(provider_id)
+        if not provider:
+            current_app.logger.error(f"Provider {provider_id} not found")
+            return {"error": f"Provider {provider_id} not found"}, 404
+            
         result = convert_and_save_provider_facets(provider_id, current_user)
         current_app.logger.debug(f"Conversion result: {result}")
-        if isinstance(result, dict) and result.get('status') == 'success':
-            return {"success": True, "result": result}
+        
+        if isinstance(result, dict):
+            if result.get('status') == 'success':
+                from .facets_json_to_markdown import convert_facets_json_to_markdown
+                md_result = convert_facets_json_to_markdown(provider_id, current_user)
+                current_app.logger.debug(f"Markdown conversion result: {md_result}")
+                return {"success": True, "result": result, "markdown": md_result}
+            else:
+                return {"error": "Conversion failed", "details": str(result)}, 400
         else:
-            return {"error": "Failed to convert provider", "details": str(result)}, 400
+            return {"error": "Invalid conversion result", "details": str(result)}, 400
+            
     except Exception as err:
         import traceback
         error_details = traceback.format_exc()
