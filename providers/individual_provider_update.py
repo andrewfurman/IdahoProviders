@@ -101,9 +101,12 @@ def update_individual_provider(provider_id):
         logger.debug("Applying field updates")
         for field, value, is_boolean in field_updates:
             logger.debug(f"Updating {field} to {value}")
-            if field == 'provider_enrollment_form_image' and value:
-                # Convert string to binary
-                setattr(provider, field, value.encode('utf-8'))
+            if field == 'provider_enrollment_form_image':
+                # Only set if there's actual content
+                if value and value.strip():
+                    setattr(provider, field, value.strip().encode('utf-8'))
+                else:
+                    setattr(provider, field, None)
             elif field in ['provider_enrollment_form_json', 'provider_facets_tables'] and value:
                 # Handle JSON fields
                 import json
