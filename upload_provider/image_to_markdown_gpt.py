@@ -31,7 +31,7 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
     data_url = _encode_image(file_storage)
 
     response = client.chat.completions.create(
-        model="gpt-4.1-nano",  # any vision-capable model is fine
+        model="gpt-4.1-mini",  # any vision-capable model is fine
         messages=[
             {
                 "role": "user",
