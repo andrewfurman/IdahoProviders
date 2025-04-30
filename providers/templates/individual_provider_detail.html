@@ -97,8 +97,8 @@
                     <h2 class="text-lg font-semibold mb-4 text-gray-700">Provider Form Data</h2>
                     <div class="space-y-3">
                         <div>
-                            <label class="text-gray-600 text-sm">Enrollment Form Image</label>
-                            <textarea name="provider_enrollment_form_image" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_image or '' }}</textarea>
+                            <label class="text-gray-600 text-sm">Enrollment Form Image URL</label>
+                            <input type="text" name="provider_enrollment_form_image" value="{{ provider.provider_enrollment_form_image.decode('utf-8') if provider.provider_enrollment_form_image else '' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         </div>
                         <div>
                             <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
@@ -106,11 +106,11 @@
                         </div>
                         <div>
                             <label class="text-gray-600 text-sm">Enrollment Form JSON</label>
-                            <textarea name="provider_enrollment_form_json" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_json|tojson if provider.provider_enrollment_form_json else '' }}</textarea>
+                            <textarea name="provider_enrollment_form_json" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_enrollment_form_json|tojson(indent=2) if provider.provider_enrollment_form_json else '{}' }}</textarea>
                         </div>
                         <div>
                             <label class="text-gray-600 text-sm">Provider Facets Tables</label>
-                            <textarea name="provider_facets_tables" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_facets_tables|tojson if provider.provider_facets_tables else '' }}</textarea>
+                            <textarea name="provider_facets_tables" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_facets_tables|tojson(indent=2) if provider.provider_facets_tables else '{}' }}</textarea>
                         </div>
                         <div>
                             <label class="text-gray-600 text-sm">Provider Facets Markdown</label>
