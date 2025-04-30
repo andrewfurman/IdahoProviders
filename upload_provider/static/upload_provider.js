@@ -39,13 +39,14 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Create provider record with both markdown and image
       const createProviderUrl = uploadForm.dataset.createProviderUrl;
-      const formData = new FormData();
-      formData.append('markdown_text', markdown);
-      formData.append('image_file', document.querySelector('input[name="image_file"]').files[0]);
+      // Create new FormData for provider creation
+      const providerFormData = new FormData();
+      providerFormData.append('markdown_text', markdown);
+      providerFormData.append('image_file', document.querySelector('input[name="image_file"]').files[0]);
       
       const providerResponse = await fetch(createProviderUrl, {
         method: 'POST',
-        body: formData
+        body: providerFormData
       });
       
       if (!providerResponse.ok) {
