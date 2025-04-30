@@ -1,3 +1,4 @@
+# This function will intake an image and then it will send the image file to the ChatGPT API and then request that this ChatGPT API call return a markdown text that reflects all of the content of the image transcribed and structured just as the content is structured in the image or as close as possible to it.  So make sure to preserve any tables in markdown, make sure to preserve any header information or footer information and format it in markdown accordingly so that the markdown file maintains the same general structure as the image.  It doesn't need to be exact but just needs to be general.
 
 """
 Utility: convert an uploaded image (Werkzeug FileStorage) to
@@ -9,9 +10,10 @@ Environment:
 
 import base64
 from typing import Union, IO
+
 from openai import OpenAI
 
-client = OpenAI(timeout=60.0)          # uses OPENAI_API_KEY from env, 60 second timeout
+client = OpenAI()          # uses OPENAI_API_KEY from env
 
 def _encode_image(file_obj: Union[IO[bytes], "FileStorage"]) -> str:
     """
@@ -29,7 +31,7 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
     data_url = _encode_image(file_storage)
 
     response = client.chat.completions.create(
-        model="gpt-4.1",  # any vision-capable model is fine
+        model="gpt-4.1-mini",  # any vision-capable model is fine
         messages=[
             {
                 "role": "user",
@@ -37,9 +39,9 @@ def image_to_markdown(file_storage, detail: str = "high") -> str:
                     {
                         "type": "text",
                         "text": (
-                            "Transcribe every piece of text in this image, and make sure to correct any spelling errors (do not change spelling of names or places or any other proper nouns)."
-                            "re-create the layout in Markdown. "
-                            "Preserve headings, tables, and structure of the document."
+                            "Transcribe every piece of text in this image, "
+                            "re-create the layout in GitHub-flavoured Markdown. "
+                            "Preserve tables, headings, and any obvious structure."
                         ),
                     },
                     {
