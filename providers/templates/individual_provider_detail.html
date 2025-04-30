@@ -1,3 +1,4 @@
+
 {% extends "header.html" %}
 
 {% block content %}
@@ -9,7 +10,14 @@
                 <p class="text-sm text-blue-600 mb-1">Individual Provider Record</p>
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold">{{ provider.first_name }} {{ provider.last_name }}</h1>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">💾 Save</button>
+                    <div class="space-x-2">
+                        <button type="button" 
+                                onclick="extractProviderInfo({{ provider.provider_id }})"
+                                class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                            ✨ Extract Provider Info
+                        </button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">💾 Save</button>
+                    </div>
                 </div>
                 <input type="text" name="provider_type" value="{{ provider.provider_type }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
             </div>
@@ -95,20 +103,10 @@
                 <div class="col-span-3">
                     <h2 class="text-lg font-semibold mb-4 text-gray-700">Provider Form Data</h2>
                     <div class="space-y-3">
-
                         <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
-                                <button type="button" 
-                                        onclick="extractProviderInfo({{ provider.provider_id }})"
-                                        class="text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded">
-                                    ✨ Extract Provider Info from Form Text
-                                </button>
-                            </div>
+                            <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
                             <textarea name="provider_enrollment_form_markdown_text" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_markdown_text or '' }}</textarea>
                         </div>
-
-                        <script src="{{ url_for('providers.static', filename='individual_providers_detail.js') }}" defer></script>
                         <div>
                             <label class="text-gray-600 text-sm">Enrollment Form JSON</label>
                             <textarea name="provider_enrollment_form_json" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_enrollment_form_json }}</textarea>
@@ -116,7 +114,8 @@
                         <div>
                             <div class="flex justify-between items-center mb-4">
                                 <label class="text-gray-600 text-sm">Provider Facets Tables</label>
-                                <button onclick="convertToFacets({{ provider.provider_id }})"
+                                <button type="button"
+                                        onclick="convertToFacets({{ provider.provider_id }})"
                                         class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded">
                                     🔄 Convert to Facets
                                 </button>
@@ -132,7 +131,7 @@
             </div>
         </form>
 
-        <!-- Medical Groups Table (unchanged) -->
+        <!-- Medical Groups Table -->
         <div class="mt-8 pt-4 border-t">
             <h2 class="text-lg font-semibold mb-4 text-gray-700">Associated Medical Groups</h2>
             <div class="overflow-x-auto">
@@ -213,4 +212,6 @@
         </div>
     </div>
 </div>
+
+<script src="{{ url_for('providers.static', filename='individual_providers_detail.js') }}"></script>
 {% endblock %}
