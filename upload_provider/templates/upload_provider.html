@@ -42,7 +42,11 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const markdownContent = document.createElement('div');
+        const rawMarkdown = {{ markdown|tojson|safe }};
+        const markdownContent = rawMarkdown.replace(/^```markdown\n([\s\S]*?)\n```$/m, '$1');
+        const formattedContent = marked.parse(markdownContent);
+        document.getElementById('markdown-content').innerHTML = formattedContent;
+      });
         markdownContent.textContent = {{ markdown|tojson|safe }};
         const formattedContent = marked.parse(markdownContent.textContent);
         document.getElementById('markdown-content').innerHTML = formattedContent;
