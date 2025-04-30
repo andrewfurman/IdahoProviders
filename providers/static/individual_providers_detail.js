@@ -1,7 +1,11 @@
+
 async function convertToFacets(providerId) {
     try {
-        const response = await fetch(`/upload_provider/convert_to_facets/${providerId}`, {
-            method: 'POST'
+        const response = await fetch(`/upload/convert_to_facets/${providerId}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
         
         const data = await response.json();
@@ -11,17 +15,18 @@ async function convertToFacets(providerId) {
             let errorMsg = 'Failed to convert to Facets\n\n';
             if (data.error) errorMsg += `Error: ${data.error}\n`;
             if (data.details) errorMsg += `Details: ${data.details}`;
-            throw new Error(errorMsg);
+            alert(errorMsg);
+            return;
         }
         
         if (data.success) {
             location.reload();
         } else {
-            throw new Error(data.error || data.details || 'Unknown error occurred');
+            alert(data.error || data.details || 'Unknown error occurred');
         }
     } catch (err) {
         console.error('Conversion Error:', err);
         console.error('Error stack:', err.stack);
-        alert(err.message || 'Error converting to Facets');
+        alert(`Error converting to Facets: ${err.message}`);
     }
 }

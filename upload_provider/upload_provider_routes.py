@@ -57,9 +57,13 @@ def convert_to_facets(provider_id):
         if isinstance(result, dict):
             if result.get('status') == 'success':
                 from .facets_json_to_markdown import convert_facets_json_to_markdown
-                md_result = convert_facets_json_to_markdown(provider_id, current_user)
-                current_app.logger.debug(f"Markdown conversion result: {md_result}")
-                return {"success": True, "result": result, "markdown": md_result}
+                try:
+                    md_result = convert_facets_json_to_markdown(provider_id, current_user)
+                    current_app.logger.debug(f"Markdown conversion result: {md_result}")
+                except Exception as md_err:
+                    current_app.logger.error(f"Markdown conversion failed: {str(md_err)}")
+                    # Continue even if markdown fails - facets data was saved
+                return {"success": True, "result": result}
             else:
                 return {"error": "Conversion failed", "details": str(result)}, 400
         else:
@@ -69,6 +73,8 @@ def convert_to_facets(provider_id):
         import traceback
         error_details = traceback.format_exc()
         current_app.logger.error(f"Error converting to Facets: {str(err)}")
+        current_app.logger.error(f"Traceback: {error_details}")
+        return {"error": "Server error", "details": str(err)}, 500
         current_app.logger.error(f"Traceback: {error_details}")
         return {"error": str(err), "details": error_details}, 500
 
