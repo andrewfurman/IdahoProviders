@@ -1,0 +1,636 @@
+# provider_to_facets.py
+
+# This function will be called to convert a provider enrollment form markdown text into a JSON object that can be used to load provider Facets tables across data elements. This function will intake just one parameter being provider database id. It will then use the provider data across fields and the related medical_groups, and the networks related to those medical_groups to build the JSON object.  This function will then save the JSON object to the provider_facets_tables field in the provider table and return a success message.
+
+# Make sure to use the update_individual_provider function to update the individual_provider_upcate function to update the database record with the new JSON object and log the change in the provider_audit table.
+
+# Note that both the hospital table in my application and the medical group table in my application map to the same provider group table in Trizetto Facets.
+
+### FILE TREE (SELECTED)
+
+├─ documentation
+|  └─ app_design
+|     ├─ facets_provider_model.md (135 lines)
+├─ models
+|  ├─ provider.py (48 lines)
+|  ├─ provider_audit.py (24 lines)
+|  ├─ hospital.py (14 lines)
+|  ├─ medical_group.py (14 lines)
+|  ├─ REL_provider_group.py (13 lines)
+|  ├─ REL_group_network.py (12 lines)
+|  ├─ REL_hospital_network.py (12 lines)
+|  ├─ REL_group_hospital.py (11 lines)
+|  ├─ network.py (9 lines)
+├─ providers
+|  ├─ individual_provider_update.py (128 lines)
+├─ upload_provider
+|  ├─ provider_to_facets.py (1 lines)
+├─ main.py (80 lines)
+├─ pyproject.toml (33 lines)
+├─ .replit (17 lines)
+
+
+### FILE CONTENTS
+
+FILE: documentation/app_design/facets_provider_model.md
+----------------------------------------
+# Facets Provider‑Domain Data Dictionary
+
+> This reference consolidates the columns most commonly surfaced in Facets COM/Web Services (PRPR, PRAD, PRAC, PRAF, PRNT, PRCN, PRFT) so you can build staging and ETL layers that align 1‑for‑1 with the production schema.  Column lists were collated from the TriZetto ISL reference 5.01, metadata exports, and typical client implementations.  Minor client‑specific custom columns (prefixed `C_` or `X_`) are **not** included.
+
+---
+## 0.  Entity‑Relationship Map (high‑level)
+
+```
+CMC_PRPR_PROV  (1) ────<  CMC_PRAD_PROV_ADDR   (0..n)
+      │                           │
+      │                           └── address/contact rows distinguished by PRAD_TYPE
+      │
+      ├────<  CMC_PRAC_PROV_CLASS  (0..n)  – type & specialty rows
+      │
+      ├────<  CMC_PRAF_PROV_AFFIL  (0..n)  – affiliations to groups/facilities
+      │               │
+      │               └── each PRAF row ties CHILD practitioner ➜ PARENT group / facility
+      │
+      ├────<  CMC_PRNT_PROV_NET    (0..n)  – network participation
+      │
+      └────<  CMC_PRCN_PROV_CONTRACT (0..n) – contract IDs (optional, payer‑specific)
+```
+
+**Primary natural key everywhere:** `PRPR_ID`  
+**Surrogate (PK) in every table:** `PRPR_CK` (int) – rarely surfaced by the APIs but handy in SQL joins.
+
+---
+## 1.  CMC_PRPR_PROV  – Provider master
+| Column | SQL Type | Null? | Sample | Notes |
+|--------|----------|-------|--------|-------|
+| **PRPR_ID** | varchar(12) | N | `1316217893` | NPI or payer‑assigned ID – **PK** (natural) |
+| PRPR_CK | int | N | 1054321 | Surrogate PK referenced by child tables |
+| PRPR_ENTITY | char(1) | N | `I` | I = Individual, F = Facility, G = Group, … |
+| PRPR_NAME_LAST | varchar(35) | N | `SMITH ORTHO CLINIC` | For individuals this is last name |
+| PRPR_NAME_FIRST | varchar(15) | Y | `ALAN` | blank for facilities/groups |
+| PRPR_NPI | char(10) | Y | `1316217893` | Always 10 digits when present |
+| PRPR_TAX_ID | char(9) | Y | `742556789` | SSN/FEIN (no dashes) |
+| PRPR_MCTR_STS | char(4) | N | `ACTV` | MCTR lookup: status (ACTV, TERM, SUSP) |
+| PRPR_EFF_DT | datetime | N | `2012‑07‑01` | Effective date |
+| PRPR_TERM_DT | datetime | N | `9999‑12‑31` | Term date = 9999‑12‑31 when active |
+| SYS_LAST_UPD_DTM | datetime | N | `2025‑03‑15 14:22:08` | Audit fields |
+| SYS_USUS_ID | char(10) | N | `ETL_BULK` | who updated |
+
+---
+## 2.  CMC_PRAD_PROV_ADDR  – Addresses / phones
+| Column | SQL Type | Null? | Sample | Notes |
+|---------|---------|-------|--------|-------|
+| **PRPR_ID** | varchar(12) | N | `1316217893` | FK to PRPR |
+| **PRAD_TYPE** | char(3) | N | `PRM` | Primary practice (`PRM`), Billing `BIL`, Remit `RMT`, etc. |
+| PRAD_EFF_DT | datetime | N | `2019‑01‑01` | |
+| PRAD_TERM_DT | datetime | N | `9999‑12‑31` | |
+| PRAD_ADDR1 | varchar(40) | Y | `123 MAIN ST STE 200` | |
+| PRAD_ADDR2 | varchar(40) | Y |  | |
+| PRAD_CITY  | varchar(19) | Y | `AUSTIN` | |
+| PRAD_STATE | char(2) | Y | `TX` | |
+| PRAD_ZIP | char(11) | Y | `78758‑1234` | 5+4 or 9 digits |
+| PRAD_PHONE | char(20) | Y | `5125557788` | |
+| PRAD_FAX   | char(20) | Y | `5125557789` | |
+
+**PK:** (`PRPR_ID`,`PRAD_TYPE`,`PRAD_EFF_DT`)
+
+---
+## 3.  CMC_PRAC_PROV_CLASS  – Type & specialty
+| Column | SQL Type | Null? | Sample | Notes |
+|---------|---------|-------|--------|-------|
+| **PRPR_ID** | varchar(12) | N | `1316217893` | FK |
+| **PRAC_TYPE_CD** | char(4) | N | `MD` | maps to MCTR (`PRAC/TYPE`) |
+| **PRAC_SPEC_CD** | char(6) | N | `207Q00000X` | primary taxonomy code |
+| PRAC_EFF_DT | datetime | N | `2019‑01‑01` | |
+| PRAC_TERM_DT | datetime | N | `9999‑12‑31` | |
+
+Multiple rows per provider when they hold several specialties.
+
+---
+## 4.  CMC_PRAF_PROV_AFFIL  – Provider affiliations
+| Column | SQL Type | Null? | Sample | Notes |
+|---------|---------|-------|--------|-------|
+| **PRPR_ID_CHILD** | varchar(12) | N | `1316217893` | Practitioner |
+| **PRPR_ID_PARENT** | varchar(12) | N | `G‑004566` | Group / facility providing umbrella |
+| PRAF_ROLE_CD | char(2) | N | `MN` | MN = Member, TL = Team Lead, etc. MCTR (`PRAF/ROLE`) |
+| PRAF_EFF_DT | datetime | N | `2020‑05‑01` | |
+| PRAF_TERM_DT | datetime | N | `9999‑12‑31` | |
+
+Cardinality: **many‑to‑many** between individual providers ↔ practices/facilities.
+
+---
+## 5.  CMC_PRNT_PROV_NET  – Network participation
+| Column | Type | Sample | Notes |
+|--------|------|--------|-------|
+| **PRPR_ID** | varchar(12) | `1316217893` | FK |
+| **NETW_ID** | char(8) | `PPO_TX_01` | Network identifier from CMC_NETW |
+| PRNT_EFF_DT / TERM_DT | datetime | `2021‑01‑01` / `9999‑12‑31` | |
+| PRNT_STS | char(1) | `A` | A = Active, T = Termed |
+
+Join to **CMC_NETW** (list of networks) on `NETW_ID`.
+
+---
+## 6.  CMC_PRCN_PROV_CONTRACT  – Contract header (optional)
+| Column | Type | Sample | Notes |
+|--------|------|--------|-------|
+| **PRPR_ID** | varchar(12) | `G‑004566` | Usually group/facility level |
+| **CONTRACT_ID** | char(12) | `BCBS_TX_PPO` | |
+| PRCN_EFF_DT / TERM_DT | datetime | `2021‑01‑01` / `9999‑12‑31` | |
+| PRCN_STS | char(1) | `A` | |
+
+Contracts usually link to **CMC_PRFT_FEE_SCHED** via `CONTRACT_ID`.
+
+---
+## 7.  Quick‑reference join keys
+| Child table | FK columns to master | Notes |
+|-------------|---------------------|-------|
+| **PRAD** | `PRPR_ID` | plus `PRAD_TYPE`,`PRAD_EFF_DT` for uniqueness |
+| **PRAC** | `PRPR_ID` | |
+| **PRAF** | `PRPR_ID_CHILD` → individual; `PRPR_ID_PARENT` → group/facility |
+| **PRNT** | `PRPR_ID`, `NETW_ID` | network roster |
+| **PRCN** | `PRPR_ID`, `CONTRACT_ID` | contracts |
+
+---
+## 8.  ETL & staging tips
+* **Surrogate vs. natural keys** – keep both; Facets occasionally re‑keys a `PRPR_ID` (rare but legal), so the integer `PRPR_CK` is the safest parent key in staging.
+* **Date‑effectivity** – always load `EFF_DT` / `TERM_DT`; Facets treats 9999‑12‑31 as “open”.
+* **Network loads** – insert a `PRNT` row for every provider/network combo **and** mirror contract participation via `PRCN` when the network is contractual.
+* **Practices vs. Individuals** – collapse both into the same staging table but carry an `entity_cd` field so downstream logic can branch on `'I'` vs `'G'`/`'F'`.
+
+---
+### Need more?
+Let me know if you want:
+1. The complete code‑table (MCTR) extracts for provider domain values.
+2. DDL (CREATE TABLE) scripts you can run in your staging schema.
+3. Sample CSVs for initial load.
+
+---
+© 2025 Provider Data Dictionary – internal use only
+
+
+
+FILE: models/provider.py
+----------------------------------------
+from .db import db
+
+class IndividualProvider(db.Model):
+    __tablename__ = 'individual_providers'
+
+    provider_id = db.Column(db.Integer, primary_key=True)
+    npi = db.Column(db.Text, nullable=False)
+    first_name = db.Column(db.Text, nullable=False)
+    last_name = db.Column(db.Text, nullable=False)
+    gender = db.Column(db.Text)
+    phone = db.Column(db.Text)
+    provider_type = db.Column(db.Text)
+    accepting_new_patients = db.Column(db.Boolean)
+    specialties = db.Column(db.Text)
+    board_certifications = db.Column(db.Text)
+    languages = db.Column(db.Text)
+    address_line = db.Column(db.Text)
+    city = db.Column(db.Text)
+    state = db.Column(db.Text)
+    zip = db.Column(db.Text)
+    provider_enrollment_form_image = db.Column(db.LargeBinary)  # BYTEA in PostgreSQL
+    provider_enrollment_form_markdown_text = db.Column(db.Text)
+    provider_enrollment_form_json = db.Column(db.JSON)  # JSONB in PostgreSQL
+    provider_facets_tables = db.Column(db.JSON)  # JSONB in PostgreSQL
+    provider_facets_markdown = db.Column(db.Text)
+
+    def to_dict(self):
+        """
+        Convert IndividualProvider object to dictionary
+        Useful for JSON serialization
+        """
+        return {
+            'provider_id': self.provider_id,
+            'npi': self.npi,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'gender': self.gender,
+            'phone': self.phone,
+            'provider_type': self.provider_type,
+            'accepting_new_patients': self.accepting_new_patients,
+            'specialties': self.specialties,
+            'board_certifications': self.board_certifications,
+            'languages': self.languages,
+            'address_line': self.address_line,
+            'city': self.city,
+            'state': self.state,
+            'zip': self.zip
+        }
+
+FILE: models/provider_audit.py
+----------------------------------------
+
+from .db import db
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
+class ProviderAudit(db.Model):
+    """Audit log for provider changes"""
+    __tablename__ = 'individual_provider_audit'
+    
+    audit_id = db.Column(db.Integer, primary_key=True)
+    provider_id = db.Column(db.Integer, db.ForeignKey('individual_providers.provider_id', ondelete='CASCADE'))
+    field_updated = db.Column(db.Text, nullable=False)
+    old_value = db.Column(db.Text)
+    new_value = db.Column(db.Text)
+    change_description = db.Column(db.Text)
+    edit_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'))
+
+    # Relationships
+    provider = db.relationship('IndividualProvider', backref=db.backref('audits', lazy='dynamic'))
+    user = db.relationship('User', foreign_keys=[user_id])
+
+
+FILE: models/hospital.py
+----------------------------------------
+
+from . import db
+
+class Hospital(db.Model):
+    __tablename__ = 'hospitals'
+    
+    hospital_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    ccn = db.Column(db.String)
+    address_line = db.Column(db.String)
+    city = db.Column(db.String)
+    state = db.Column(db.String)
+    zip = db.Column(db.String)
+
+
+FILE: models/medical_group.py
+----------------------------------------
+
+from . import db
+
+class MedicalGroup(db.Model):
+    __tablename__ = 'medical_groups'
+    
+    group_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    tax_id = db.Column(db.String)
+    address_line = db.Column(db.String)
+    city = db.Column(db.String)
+    state = db.Column(db.String)
+    zip = db.Column(db.String)
+
+
+FILE: models/REL_provider_group.py
+----------------------------------------
+
+from . import db
+
+class ProviderGroup(db.Model):
+    __tablename__ = 'individual_provider_medical_group'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    provider_id = db.Column(db.Integer, db.ForeignKey('individual_providers.provider_id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('medical_groups.group_id'))
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    primary_flag = db.Column(db.Boolean)
+
+
+FILE: models/REL_group_network.py
+----------------------------------------
+
+from . import db
+
+class GroupNetwork(db.Model):
+    __tablename__ = 'medical_group_network'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('medical_groups.group_id'))
+    network_id = db.Column(db.Integer, db.ForeignKey('networks.network_id'))
+    effective_date = db.Column(db.Date)
+    status = db.Column(db.String)
+
+
+FILE: models/REL_hospital_network.py
+----------------------------------------
+
+from . import db
+
+class HospitalNetwork(db.Model):
+    __tablename__ = 'hospital_network'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    hospital_id = db.Column(db.Integer, db.ForeignKey('hospitals.hospital_id'))
+    network_id = db.Column(db.Integer, db.ForeignKey('networks.network_id'))
+    effective_date = db.Column(db.Date)
+    status = db.Column(db.String)
+
+
+FILE: models/REL_group_hospital.py
+----------------------------------------
+
+from . import db
+
+class GroupHospital(db.Model):
+    __tablename__ = 'medical_group_hospital'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('medical_groups.group_id'))
+    hospital_id = db.Column(db.Integer, db.ForeignKey('hospitals.hospital_id'))
+    privilege_type = db.Column(db.String)
+
+
+FILE: models/network.py
+----------------------------------------
+# Models/network.py
+from . import db
+
+class Network(db.Model):
+    __tablename__ = 'networks'
+    
+    network_id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, nullable=False)
+
+FILE: providers/individual_provider_update.py
+----------------------------------------
+from flask import current_app, request, redirect, url_for, flash
+from flask_login import current_user
+from main import db
+from models import IndividualProvider
+from models.provider_audit import ProviderAudit
+from models.auth import User
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)
+logger.debug("Models imported: IndividualProvider, ProviderAudit, User")
+
+def update_individual_provider(provider_id):
+    logger = current_app.logger
+    logger.setLevel(logging.DEBUG)
+
+    logger.debug(f"Starting provider update for ID: {provider_id}")
+
+    provider = db.session.query(IndividualProvider).get(provider_id)
+    if provider is None:
+        logger.error(f"Provider not found with ID: {provider_id}")
+        return {"error": "Provider not found"}, 404
+
+    # Fields to track for audit
+    fields_to_track = {
+        'npi': 'NPI',
+        'first_name': 'First Name',
+        'last_name': 'Last Name', 
+        'gender': 'Gender',
+        'phone': 'Phone',
+        'provider_type': 'Provider Type',
+        'accepting_new_patients': 'Accepting New Patients',
+        'specialties': 'Specialties',
+        'board_certifications': 'Board Certifications',
+        'languages': 'Languages',
+        'address_line': 'Address',
+        'city': 'City',
+        'state': 'State',
+        'zip': 'ZIP',
+        'provider_enrollment_form_image': 'Enrollment Form Image',
+        'provider_enrollment_form_markdown_text': 'Enrollment Form Markdown',
+        'provider_enrollment_form_json': 'Enrollment Form JSON',
+        'provider_facets_tables': 'Provider Facets Tables',
+        'provider_facets_markdown': 'Provider Facets Markdown'
+    }
+
+    try:
+        audit_records = []
+        field_updates = []
+
+        logger.debug("Checking for field changes...")
+        # First pass - collect all changes
+        for field, display_name in fields_to_track.items():
+            # Skip image field since it's handled separately
+            if field == 'provider_enrollment_form_image':
+                continue
+                
+            old_value = str(getattr(provider, field))
+            new_value = str(request.form.get(field))
+
+            # For boolean fields
+            if field == 'accepting_new_patients':
+                new_value = str(request.form.get(field) == 'true')
+
+            if old_value != new_value:
+                logger.debug(f"Change detected in {field}: {old_value} -> {new_value}")
+                # Store the change
+                field_updates.append((field, request.form.get(field), field == 'accepting_new_patients'))
+
+                # Create audit record
+                try:
+                    logger.debug(f"Creating audit record for {field}")
+                    logger.debug(f"Current user ID: {current_user.id if current_user.is_authenticated else 'None'}")
+
+                    audit = ProviderAudit(
+                        provider_id=provider_id,
+                        field_updated=display_name,
+                        old_value=old_value,
+                        new_value=new_value,
+                        change_description=f"Updated {display_name}",
+                        user_id=current_user.id if current_user.is_authenticated else None
+                    )
+                    audit_records.append(audit)
+                except Exception as e:
+                    logger.error(f"Error creating audit record: {str(e)}")
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    raise
+
+        # Second pass - apply all changes if audit records were created successfully
+        logger.debug(f"Attempting to add {len(audit_records)} audit records")
+        for audit in audit_records:
+            try:
+                db.session.add(audit)
+                db.session.flush()  # Test if audit record can be created
+                logger.debug(f"Successfully added audit record for {audit.field_updated}")
+            except Exception as e:
+                logger.error(f"Failed to create audit record: {str(e)}")
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                db.session.rollback()
+                flash(f'Error creating audit record: {str(e)}')
+                return redirect(url_for('providers.provider_detail', provider_id=provider_id))
+
+        # Apply the actual field updates
+        logger.debug("Applying field updates")
+        for field, value, is_boolean in field_updates:
+            logger.debug(f"Updating {field} to {value}")
+            if field == 'provider_enrollment_form_image':
+                # Skip image field in form update since it's handled separately
+                continue
+            elif field in ['provider_enrollment_form_json', 'provider_facets_tables']:
+                # Store JSON as is
+                setattr(provider, field, value if value else None)
+            elif is_boolean:
+                setattr(provider, field, value == 'true')
+            else:
+                setattr(provider, field, value)
+
+        db.session.commit()
+        logger.info("Provider update completed successfully")
+        flash('Provider updated successfully')
+
+    except Exception as e:
+        logger.error(f"Failed to update provider: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        db.session.rollback()
+        flash(f'Error updating provider: {str(e)}')
+
+    return redirect(url_for('providers.provider_detail', provider_id=provider_id))
+
+FILE: upload_provider/provider_to_facets.py
+----------------------------------------
+# provider_to_facets.py
+
+# This function will be called to convert a provider enrollment form markdown text into a JSON object that can be used to load provider Facets tables across data elements. This function will intake just one parameter being provider database id. It will then use the provider data across fields and the related medical_groups, and the networks related to those medical_groups to build the JSON object.  This function will then save the JSON object to the provider_facets_tables field in the provider table and return a success message.
+
+# Make sure to use the update_individual_provider function to update the individual_provider_upcate function to update the database record with the new JSON object and log the change in the provider_audit table.
+
+# Note that both the hospital table in my application and the medical group table in my application map to the same provider group table in Trizetto Facets.
+
+FILE: main.py
+----------------------------------------
+from flask import Flask, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+from flask_login import LoginManager
+from itsdangerous import URLSafeTimedSerializer
+import os
+
+# Initialize extensions
+db = SQLAlchemy()
+mail = Mail()
+login_mgr = LoginManager()
+
+app = Flask(__name__)
+
+# ────────────────────────────────────────────────────────────────
+# Core configuration
+# ────────────────────────────────────────────────────────────────
+# Database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_URL"]
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,  # Recycle connections every 5 minutes
+    'pool_timeout': 30,   # Connection timeout of 30 seconds
+    'pool_size': 10       # Maximum pool size
+}
+
+# Secrets ─── raise early if they're missing
+try:
+    app.config["FLASK_SECRET_KEY"] = os.environ["FLASK_SECRET_KEY"]
+    app.config["SECURITY_TOKEN_SALT"] = os.environ["SECURITY_TOKEN_SALT"]
+except KeyError as missing:
+    raise ValueError(f"Required environment variable {missing} is not set")
+
+# `app.secret_key` writes to app.config["SECRET_KEY"]; keep both for clarity
+app.secret_key = app.config["FLASK_SECRET_KEY"]
+
+# Mail (optional—but convenient to load here)
+app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", "587"))
+app.config["MAIL_USE_TLS"] = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
+app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.environ.get(
+    "EMAILS_SENT_FROM", app.config["MAIL_USERNAME"]
+)
+
+# Initialize extensions with app
+db.init_app(app)
+mail.init_app(app)
+login_mgr.init_app(app)
+
+# Create URL safe serializer
+ts = URLSafeTimedSerializer(
+    secret_key=app.config["FLASK_SECRET_KEY"],
+    salt=app.config["SECURITY_TOKEN_SALT"]
+)
+
+# ────────────────────────────────────────────────────────────────
+# Blueprints & routes
+# ────────────────────────────────────────────────────────────────
+from providers.providers_routes import providers_bp
+from auth import bp as auth_bp
+from work_queues.work_queue_routes import wq_bp
+from upload_provider.upload_provider_routes import upload_provider_bp
+
+app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(providers_bp)
+app.register_blueprint(wq_bp)
+app.register_blueprint(upload_provider_bp)
+
+@app.route("/")
+def index():
+    return redirect(url_for("upload_provider.upload"))
+
+# ────────────────────────────────────────────────────────────────
+# Entrypoint
+# ────────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
+
+FILE: pyproject.toml
+----------------------------------------
+[tool.poetry]
+name = "python-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.11.0,<3.12"
+flask = "^3.0.0"
+gunicorn = "^21.2.0"
+networks = "^0.3.7"
+psycopg2-binary = "^2.9.10"
+flask-sqlalchemy = "^3.1.1"
+flask-mail = "^0.10.0"
+flask-login = "^0.6.3"
+itsdangerous = "^2.2.0"
+sqlalchemy = "^2.0.40"
+openai = "^1.12.0"
+# marked = "^5.1.1"
+
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+useLibraryCodeForTypes = true
+exclude = [".cache"]
+
+[tool.ruff]
+# https://beta.ruff.rs/docs/configuration/
+select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
+ignore = ['W291', 'W292', 'W293']
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+FILE: .replit
+----------------------------------------
+run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+entrypoint = "main.py"
+modules = ["python-3.11", "postgresql-16"]
+
+hidden = [".pythonlibs"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run =  ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+
