@@ -1,4 +1,3 @@
-
 {% extends "header.html" %}
 
 {% block content %}
@@ -67,6 +66,38 @@
             </div>
         </div>
 
+                <!-- Provider Form Data -->
+                <div class="col-span-3">
+                    <h2 class="text-lg font-semibold mb-4 text-gray-700">Provider Form Data</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="text-gray-600 text-sm">Enrollment Form Image</label>
+                            <p class="mt-1 text-gray-900">{{ provider.provider_enrollment_form_image|default('Not Found', true) }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
+                            <p class="mt-1 text-gray-900">{{ provider.provider_enrollment_form_markdown_text|default('Not Found', true) }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Enrollment Form JSON</label>
+                            <p class="mt-1 text-gray-900">{{ provider.provider_enrollment_form_json|default('Not Found', true)|tojson }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Provider Facets Tables</label>
+                            <p class="mt-1 text-gray-900">{{ provider.provider_facets_tables|default('Not Found', true)|tojson }}</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 text-sm">Provider Facets Markdown</label>
+                            <p class="mt-1 text-gray-900">{{ provider.provider_facets_markdown|default('Not Found', true) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Medical Groups Table (unchanged) -->
+        <div class="mt-8 pt-4 border-t">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Associated Medical Groups</h2>
+        </div>
         <div class="mt-8 pt-4 border-t">
             <a href="{{ url_for('providers.providers') }}" class="text-blue-600 hover:text-blue-800">← Back to Provider List</a>
         </div>
