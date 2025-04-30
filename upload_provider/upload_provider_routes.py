@@ -7,6 +7,7 @@ upload_provider_bp = Blueprint(
     "upload_provider",
     __name__,
     template_folder="templates",
+    static_folder="static",
     url_prefix="/upload"
 )
 
