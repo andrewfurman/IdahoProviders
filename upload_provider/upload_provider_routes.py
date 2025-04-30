@@ -16,20 +16,26 @@ def upload():                                    # GET /upload/
     return render_template("upload_provider.html")
 
 @upload_provider_bp.post("/process")
-def process_image():                             # POST /upload/process
+def process_image():
     uploaded_file = request.files.get("image_file")
     if not uploaded_file:
-        flash("Please choose a file first.", "error")
-        return render_template("upload_provider.html")
-
-    # Optional: keep a copy on disk if you need auditing
-    # filename = secure_filename(uploaded_file.filename)
-    # uploaded_file.save(os.path.join(current_app.instance_path, filename))
+        return {"error": "No file provided"}, 400
 
     try:
         markdown = image_to_markdown(uploaded_file)
+        return {"markdown": markdown}
     except Exception as err:
-        flash(f"Extraction failed: {err}", "error")
-        return render_template("upload_provider.html")
+        return {"error": str(err)}, 500
 
-    return render_template("upload_provider.html", markdown=markdown)
+@upload_provider_bp.post("/create_provider")
+def create_provider():
+    markdown_text = request.json.get("markdown_text")
+    if not markdown_text:
+        return {"error": "No markdown text provided"}, 400
+
+    try:
+        from .create_individual_provider_from_image import create_individual_provider_from_markdown
+        provider = create_individual_provider_from_markdown(markdown_text)
+        return {"provider_id": provider.provider_id}
+    except Exception as err:
+        return {"error": str(err)}, 500

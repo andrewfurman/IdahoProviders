@@ -1,58 +1,59 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-  const uploadForm = document.querySelector('form');
-  const submitButton = uploadForm.querySelector('button[type="submit"]');
-  let elapsedTime = 0;
-  let timerInterval;
+  const uploadForm = document.getElementById('uploadForm');
+  const processingStatus = document.getElementById('processingStatus');
+  const extractionResults = document.getElementById('extractionResults');
+  const markdownContent = document.getElementById('markdownContent');
 
-  function showLoading() {
-    const originalText = submitButton.innerHTML;
-    submitButton.disabled = true;
+  uploadForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-    // Create loading container
-    const loadingContainer = document.createElement('div');
-    loadingContainer.id = 'loadingContainer';
-    loadingContainer.className = 'mt-4 text-center';
-    loadingContainer.innerHTML = `
-      <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-      <div id="timer" class="mt-2 text-gray-600">Waiting: 0s</div>
-    `;
+    // Show processing status
+    processingStatus.classList.remove('hidden');
+    extractionResults.classList.add('hidden');
     
-    // Insert after form
-    uploadForm.parentNode.insertBefore(loadingContainer, uploadForm.nextSibling);
-    
-    // Start timer
-    timerInterval = setInterval(() => {
-      elapsedTime++;
-      document.getElementById('timer').textContent = `Waiting: ${elapsedTime}s`;
-    }, 1000);
-  }
-
-  function hideLoading() {
-    submitButton.disabled = false;
-    const loadingContainer = document.getElementById('loadingContainer');
-    if (loadingContainer) {
-      loadingContainer.remove();
-    }
-    clearInterval(timerInterval);
-    elapsedTime = 0;
-  }
-
-  uploadForm.addEventListener('submit', function() {
-    showLoading();
-  });
-
-  // Handle response completion
-  const originalFetch = window.fetch;
-  window.fetch = function() {
-    return originalFetch.apply(this, arguments)
-      .then(response => {
-        hideLoading();
-        return response;
-      })
-      .catch(error => {
-        hideLoading();
-        throw error;
+    try {
+      // First process the image
+      const formData = new FormData(uploadForm);
+      const response = await fetch(uploadForm.action, {
+        method: 'POST',
+        body: formData
       });
-  };
+      
+      if (!response.ok) throw new Error('Image processing failed');
+      
+      const { markdown } = await response.json();
+      
+      // Show extraction results
+      markdownContent.innerHTML = marked.parse(markdown);
+      extractionResults.classList.remove('hidden');
+      
+      // Create provider record
+      const createProviderUrl = uploadForm.dataset.createProviderUrl;
+      const providerResponse = await fetch(createProviderUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ markdown_text: markdown })
+      });
+      
+      if (!providerResponse.ok) throw new Error('Provider creation failed');
+      
+      const { provider_id } = await providerResponse.json();
+      
+      // Wait 5 seconds then redirect
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Redirect to provider detail page
+      const detailUrl = uploadForm.dataset.providerDetailUrl.replace('/0', `/${provider_id}`);
+      window.location.href = detailUrl;
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while processing the request');
+    } finally {
+      processingStatus.classList.add('hidden');
+    }
+  });
 });

@@ -9,9 +9,12 @@
     <h1 class="text-2xl font-bold mb-6">Upload Provider Image</h1>
 
     <!-- Upload form -->
-    <form action="{{ url_for('upload_provider.process_image') }}"
+    <form id="uploadForm" 
+          action="{{ url_for('upload_provider.process_image') }}"
           method="post"
           enctype="multipart/form-data"
+          data-create-provider-url="{{ url_for('upload_provider.create_provider') }}"
+          data-provider-detail-url="{{ url_for('providers.provider_detail', provider_id=0) }}"
           class="space-y-4">
 
       <input type="file"
@@ -33,22 +36,18 @@
       </button>
     </form>
 
-    {% if markdown %}
+    <!-- Processing status -->
+    <div id="processingStatus" class="hidden mt-6 text-center">
+      <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+      <p class="mt-2 text-gray-600">Processing image...</p>
+    </div>
+
     <!-- Extraction results -->
-    <div class="mt-10">
+    <div id="extractionResults" class="hidden mt-6">
       <h2 class="text-xl font-semibold mb-2">Extracted Text</h2>
-      <div id="markdown-content" class="prose max-w-none bg-gray-50 border rounded p-4 overflow-x-auto">
+      <div id="markdownContent" class="prose max-w-none bg-gray-50 border rounded p-4 overflow-x-auto">
       </div>
     </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const markdownContent = document.createElement('div');
-        markdownContent.textContent = {{ markdown|tojson|safe }};
-        const formattedContent = marked.parse(markdownContent.textContent);
-        document.getElementById('markdown-content').innerHTML = formattedContent;
-      });
-    </script>
-    {% endif %}
 
     <div class="mt-8 pt-4 border-t">
       <a href="{{ url_for('providers.providers') }}"
