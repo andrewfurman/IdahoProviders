@@ -41,7 +41,11 @@ def delete_provider(provider_id):
     provider = db.session.query(IndividualProvider).get(provider_id)
     if provider is None:
         abort(404)
-        
+
+    # First delete all provider group relationships
+    db.session.query(ProviderGroup).filter(ProviderGroup.provider_id == provider_id).delete()
+    
+    # Then delete the provider
     db.session.delete(provider)
     db.session.commit()
     flash('Provider deleted successfully', 'success')
