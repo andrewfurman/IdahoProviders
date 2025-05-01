@@ -97,19 +97,42 @@
                 <div class="col-span-3">
                     <h2 class="text-lg font-semibold mb-4 text-gray-700">Provider Form Data</h2>
                     <div class="space-y-3">
+                        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+                        
                         <div>
                             <label class="text-gray-600 text-sm">Enrollment Form Markdown</label>
-                            <textarea name="provider_enrollment_form_markdown_text" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_markdown_text or '' }}</textarea>
+                            <textarea id="enrollmentMarkdown" name="provider_enrollment_form_markdown_text" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_enrollment_form_markdown_text or '' }}</textarea>
+                            <div id="enrollmentPreview" class="mt-2 p-4 rounded border bg-gray-50 prose prose-sm max-h-48 overflow-y-auto"></div>
                         </div>
                         
                         <div>
                             <label class="text-gray-600 text-sm">Provider Facets Tables</label>
                             <textarea name="provider_facets_tables" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm font-mono">{{ provider.provider_facets_tables }}</textarea>
                         </div>
+                        
                         <div>
                             <label class="text-gray-600 text-sm">Provider Facets Markdown</label>
-                            <textarea name="provider_facets_markdown" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_facets_markdown or '' }}</textarea>
+                            <textarea id="facetsMarkdown" name="provider_facets_markdown" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ provider.provider_facets_markdown or '' }}</textarea>
+                            <div id="facetsPreview" class="mt-2 p-4 rounded border bg-gray-50 prose prose-sm max-h-48 overflow-y-auto"></div>
                         </div>
+
+                        <script>
+                          function updatePreview(sourceId, previewId) {
+                            const source = document.getElementById(sourceId);
+                            const preview = document.getElementById(previewId);
+                            preview.innerHTML = marked.parse(source.value);
+                          }
+
+                          // Initial render
+                          updatePreview('enrollmentMarkdown', 'enrollmentPreview');
+                          updatePreview('facetsMarkdown', 'facetsPreview');
+
+                          // Live updates
+                          document.getElementById('enrollmentMarkdown').addEventListener('input', () => 
+                            updatePreview('enrollmentMarkdown', 'enrollmentPreview'));
+                          document.getElementById('facetsMarkdown').addEventListener('input', () => 
+                            updatePreview('facetsMarkdown', 'facetsPreview'));
+                        </script>
                     </div>
                 </div>
             </div> <!-- /grid -->
