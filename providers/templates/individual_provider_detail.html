@@ -10,17 +10,7 @@
                 <p class="text-sm text-blue-600 mb-1">Individual Provider Record</p>
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold">{{ provider.first_name }} {{ provider.last_name }}</h1>
-                    <div class="space-x-2">
-                        <button type="button" 
-                                class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-                                id="extractProviderInfoBtn">
-                            ✨ Extract Provider Info
-                        </button>
-                        <button type="button"
-                                class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-                                id="convertToFacetsBtn">
-                            🔄 Convert to Facets
-                        </button>
+                    <div>
                         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">💾 Save</button>
                     </div>
                 </div>
@@ -209,3 +199,24 @@
 
 <script src="{{ url_for('providers.static', filename='individual_providers_detail.js') }}" defer></script>
 {% endblock %}
+
+
+        </form>
+
+        <!-- Data Partitioning Actions -->
+        <div class="mt-8 pt-4 border-t">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Data Partitioning Actions</h2>
+            <div class="flex space-x-4">
+                <button type="button" 
+                        class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 flex items-center"
+                        id="extractProviderInfoBtn">
+                    <span class="mr-2">✨</span> Extract Provider Info
+                </button>
+                <button type="button"
+                        class="bg-purple-600 text-white px-6 py-3 rounded hover:bg-purple-700 flex items-center"
+                        id="convertToFacetsBtn">
+                    <span class="mr-2">🔄</span> Convert to Facets
+                </button>
+            </div>
+        </div>
+
