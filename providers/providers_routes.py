@@ -36,6 +36,17 @@ def providers():
     providers = db.session.query(IndividualProvider).all()
     return render_template('individual_providers.html', providers=providers)
 
+@providers_bp.route('/individual_providers/<int:provider_id>/delete', methods=['POST'])
+def delete_provider(provider_id):
+    provider = db.session.query(IndividualProvider).get(provider_id)
+    if provider is None:
+        abort(404)
+        
+    db.session.delete(provider)
+    db.session.commit()
+    flash('Provider deleted successfully', 'success')
+    return redirect(url_for('providers.providers'))
+
 @providers_bp.route('/networks')
 def networks():
     networks = db.session.query(Network).order_by(Network.network_id).all()
