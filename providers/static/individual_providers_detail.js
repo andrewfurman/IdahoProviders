@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Get buttons by ID
   const extractButton = document.getElementById('extractProviderInfoBtn');
   const convertButton = document.getElementById('convertToFacetsBtn');
+  
   if (extractButton) {
     extractButton.addEventListener('click', async function() {
       try {
@@ -37,8 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Add click handler for Convert to Facets button (second purple button)
-  const convertButton = buttons[1];
   if (convertButton) {
     convertButton.addEventListener('click', async function() {
       try {
