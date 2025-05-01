@@ -1,62 +1,54 @@
+/*  providers/static/individual_providers_detail.js
+    Handles Extract-Provider-Info and Convert-to-Facets actions.
+   • Always guards JSON parsing – never crashes on HTML responses
+   • Displays server-side error messages cleanly
+*/
 
-// Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', function() {
-  // Get buttons by ID
-  const extractButton = document.getElementById('extractProviderInfoBtn');
-  const convertButton = document.getElementById('convertToFacetsBtn');
-  
-  // Get provider ID from the form
+document.addEventListener('DOMContentLoaded', () => {
+  // ---------- Helpers ----------
+  const hitEndpoint = async (url, successMsg) => {
+    try {
+      const resp = await fetch(url, { method: 'POST' });
+
+      // If server sends JSON we parse it; otherwise fall back to raw text
+      const isJson = (resp.headers.get('content-type') || '')
+                       .includes('application/json');
+      const payload = isJson ? await resp.json()
+                             : { success: false, error: await resp.text() };
+
+      if (!resp.ok || payload.success === false) {
+        const msg = payload.error || `HTTP ${resp.status}`;
+        throw new Error(msg);
+      }
+
+      alert(successMsg);
+      location.reload();
+    } catch (err) {
+      console.error(err);
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+  // ---------- Grab provider_id ----------
   const providerForm = document.getElementById('providerForm');
-  const formAction = providerForm.getAttribute('action');
-  const providerId = formAction.split('/').pop().split('?')[0];
-  
-  if (extractButton) {
-    extractButton.addEventListener('click', async function() {
-      try {
-        const response = await fetch(`/upload/extract_provider_info/${providerId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+  if (!providerForm) return;
 
-        const data = await response.json();
-        
-        if (data.success) {
-          alert('Provider information extracted successfully');
-          window.location.reload();
-        } else {
-          throw new Error(data.error || 'Failed to extract provider information');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error extracting provider information: ' + error.message);
-      }
-    });
-  }
+  const providerId =
+    providerForm.getAttribute('action')      // .../update/123
+               .split('/')                   // ["", "...", "123"]
+               .filter(Boolean).pop();       // "123"
 
-  if (convertButton) {
-    convertButton.addEventListener('click', async function() {
-      try {
-        const response = await fetch(`/upload/convert_to_facets/${providerId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+  // ---------- Wire the buttons ----------
+  const extractBtn = document.getElementById('extractProviderInfoBtn');
+  const facetsBtn  = document.getElementById('convertToFacetsBtn');
 
-        const data = await response.json();
-        
-        if (data.success) {
-          alert('Provider converted to Facets successfully');
-          window.location.reload();
-        } else {
-          throw new Error(data.error || 'Failed to convert provider to Facets');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error converting to Facets: ' + error.message);
-      }
-    });
-  }
+  extractBtn?.addEventListener('click', () =>
+    hitEndpoint(`/upload/extract_provider_info/${providerId}`,
+                'Provider information extracted successfully')
+  );
+
+  facetsBtn?.addEventListener('click', () =>
+    hitEndpoint(`/upload/convert_to_facets/${providerId}`,
+                'Provider converted to Facets successfully')
+  );
 });
