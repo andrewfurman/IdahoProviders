@@ -1,71 +1,62 @@
-// ───────────────────────────────────────────────────────────────
-//  providers/static/individual_providers_detail.js
-//  Handles client‑side actions for the individual provider detail page
-// ───────────────────────────────────────────────────────────────
 
-// Wait for DOM to be ready
+// Handle file upload and markdown processing
 document.addEventListener('DOMContentLoaded', () => {
-  // Buttons
-  const extractButton = document.getElementById('extractProviderInfoBtn');
-  const convertButton = document.getElementById('convertToFacetsBtn');
+  const uploadForm = document.getElementById('uploadForm');
+  const processingStatus = document.getElementById('processingStatus');
+  const extractionResults = document.getElementById('extractionResults');
+  const markdownContent = document.getElementById('markdownContent');
 
-  // Provider ID is embedded in the form action URL
-  const providerForm = document.getElementById('providerForm');
-  let providerId = null;
-  if (providerForm) {
-    const formAction = providerForm.getAttribute('action');
-    providerId = formAction.split('/').pop().split('?')[0];
-  }
+  if (!uploadForm) return;
 
-  // Graceful fallback if providerId could not be parsed
-  if (!providerId) {
-    console.error('Unable to determine provider_id from providerForm action URL.');
-    return;
-  }
-
-  // --------------------  Extract Provider Info  --------------------
-  if (extractButton) {
-    extractButton.addEventListener('click', async () => {
-      try {
-        const resp = await fetch(`/upload/extract_provider_info/${providerId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        const data = await resp.json();
-        if (data.success) {
-          alert('Provider information extracted successfully');
-          window.location.reload();
-        } else {
-          throw new Error(data.error || 'Unknown error extracting provider info');
-        }
-      } catch (err) {
-        console.error('Error extracting provider info:', err);
-        alert(`Error extracting provider information: ${err.message}`);
+  uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Show processing status
+    processingStatus.classList.remove('hidden');
+    extractionResults.classList.add('hidden');
+    
+    try {
+      const formData = new FormData(uploadForm);
+      const processUrl = uploadForm.getAttribute('action');
+      const createProviderUrl = uploadForm.getAttribute('data-create-provider-url');
+      
+      // First extract markdown from image
+      const processResp = await fetch(processUrl, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const processData = await processResp.json();
+      if (!processData.success) {
+        throw new Error(processData.error || 'Failed to process image');
       }
-    });
-  }
-
-  // --------------------  Convert to Facets  --------------------
-  if (convertButton) {
-    convertButton.addEventListener('click', async () => {
-      try {
-        const resp = await fetch(`/upload/convert_to_facets/${providerId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        const data = await resp.json();
-        if (data.success) {
-          alert('Provider data converted to Facets successfully');
-          window.location.reload();
-        } else {
-          throw new Error(data.error || 'Unknown error converting to Facets');
-        }
-      } catch (err) {
-        console.error('Error converting provider to Facets:', err);
-        alert(`Error converting to Facets: ${err.message}`);
+      
+      // Display the markdown
+      markdownContent.innerHTML = marked.parse(processData.markdown);
+      
+      // Create provider with markdown and image
+      formData.append('markdown_text', processData.markdown);
+      const createResp = await fetch(createProviderUrl, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const createData = await createResp.json();
+      if (!createData.success) {
+        throw new Error(createData.error || 'Failed to create provider');
       }
-    });
-  }
+      
+      // Redirect to provider detail page
+      const detailUrl = uploadForm.getAttribute('data-provider-detail-url')
+                                .replace('/0', `/${createData.provider_id}`);
+      window.location.href = detailUrl;
+      
+    } catch (err) {
+      console.error('Error:', err);
+      alert(`Error: ${err.message}`);
+    } finally {
+      processingStatus.classList.add('hidden');
+      extractionResults.classList.remove('hidden');
+    }
+  });
 });
