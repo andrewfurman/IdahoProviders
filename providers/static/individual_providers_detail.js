@@ -1,9 +1,11 @@
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
-  // Get the Extract Provider Info button
-  const extractButton = document.querySelector('button[class*="bg-purple-600"]:first-of-type');
+  // Get both purple buttons
+  const buttons = document.querySelectorAll('button[class*="bg-purple-600"]');
   
+  // Add click handler for Extract Provider Info button (first purple button)
+  const extractButton = buttons[0];
   if (extractButton) {
     extractButton.addEventListener('click', async function() {
       try {
@@ -33,6 +35,37 @@ document.addEventListener('DOMContentLoaded', function() {
       } catch (error) {
         console.error('Error:', error);
         alert('Error extracting provider information: ' + error.message);
+      }
+    });
+  }
+
+  // Add click handler for Convert to Facets button (second purple button)
+  const convertButton = buttons[1];
+  if (convertButton) {
+    convertButton.addEventListener('click', async function() {
+      try {
+        const providerForm = document.getElementById('providerForm');
+        const formAction = providerForm.getAttribute('action');
+        const providerId = formAction.split('/').pop().split('?')[0];
+        
+        const response = await fetch(`/upload/convert_to_facets/${providerId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Provider converted to Facets successfully');
+          window.location.reload();
+        } else {
+          throw new Error(data.error || 'Failed to convert provider to Facets');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error converting to Facets: ' + error.message);
       }
     });
   }
