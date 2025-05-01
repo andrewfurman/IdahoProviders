@@ -12,12 +12,10 @@
                     <h1 class="text-3xl font-bold">{{ provider.first_name }} {{ provider.last_name }}</h1>
                     <div class="space-x-2">
                         <button type="button" 
-                                onclick="extractProviderInfo({{ provider.provider_id }})"
                                 class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
                             ✨ Extract Provider Info
                         </button>
                         <button type="button"
-                                onclick="convertToFacets({{ provider.provider_id }})"
                                 class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
                             🔄 Convert to Facets
                         </button>
@@ -203,10 +201,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-
-        <div class="mt-8 pt-4 border-t">
-            <a href="{{ url_for('providers.providers') }}" class="text-blue-600 hover:text-blue-800">← Back to Provider List</a>
         </div>
     </div>
 </div>
