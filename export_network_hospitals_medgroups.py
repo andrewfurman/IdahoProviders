@@ -1,14 +1,73 @@
-# this python function will export all the hospitals, medical groups, and networks to a CSV file.  It will use the hospital, medical group, and network models to query the database and then write the results to a CSV file.  The CSV file will have
 
-# for networks export only ID, Code, Name
+"""Export hospitals, networks, medical groups and their relationships to markdown tables.
+This script queries the database and formats the data in markdown tables.
+"""
 
-# for network hospital relationships export only hospital ID, network ID
+from main import db, app
+from models.hospital import Hospital
+from models.network import Network
+from models.medical_group import MedicalGroup
+from models.REL_hospital_network import HospitalNetwork  
+from models.REL_group_hospital import GroupHospital
 
-# for hospitals export only ID, Name
+def generate_markdown_tables():
+    """Generate markdown tables for each entity and relationship."""
+    
+    # Query all data
+    networks = db.session.query(Network).order_by(Network.network_id).all()
+    hospitals = db.session.query(Hospital).order_by(Hospital.hospital_id).all()
+    medical_groups = db.session.query(MedicalGroup).order_by(MedicalGroup.group_id).all()
+    
+    # Build the markdown string
+    markdown = []
+    
+    # Networks table
+    markdown.append("## Networks\n")
+    markdown.append("| ID | Code | Name |")
+    markdown.append("|-----|------|------|")
+    for network in networks:
+        markdown.append(f"| {network.network_id} | {network.code} | {network.name} |")
+    markdown.append("\n")
+    
+    # Hospitals table
+    markdown.append("## Hospitals\n") 
+    markdown.append("| ID | Name |")
+    markdown.append("|-----|------|")
+    for hospital in hospitals:
+        markdown.append(f"| {hospital.hospital_id} | {hospital.name} |")
+    markdown.append("\n")
+    
+    # Medical Groups table
+    markdown.append("## Medical Groups\n")
+    markdown.append("| ID | Name | Address |")
+    markdown.append("|-----|------|---------|")
+    for group in medical_groups:
+        markdown.append(f"| {group.group_id} | {group.name} | {group.address_line or ''} |")
+    markdown.append("\n")
+    
+    # Hospital-Network relationships
+    markdown.append("## Hospital-Network Relationships\n")
+    markdown.append("| Hospital ID | Network ID |")
+    markdown.append("|------------|------------|")
+    hospital_networks = db.session.query(HospitalNetwork).all()
+    for rel in hospital_networks:
+        markdown.append(f"| {rel.hospital_id} | {rel.network_id} |")
+    markdown.append("\n")
+    
+    # Medical Group-Hospital relationships
+    markdown.append("## Medical Group-Hospital Relationships\n")
+    markdown.append("| Medical Group ID | Hospital ID |")
+    markdown.append("|-----------------|-------------|")
+    group_hospitals = db.session.query(GroupHospital).all()
+    for rel in group_hospitals:
+        markdown.append(f"| {rel.group_id} | {rel.hospital_id} |")
+    
+    return "\n".join(markdown)
 
-# for medical group hospital relationships export only medical group ID, hospital ID
-
-# for medical groups export only ID, Name, address_line
-
-# return the text in a markdown style table that can be preinted to the command line
-
+if __name__ == "__main__":
+    with app.app_context():
+        try:
+            markdown_output = generate_markdown_tables()
+            print(markdown_output)
+        except Exception as e:
+            print(f"Error generating markdown tables: {e}")
