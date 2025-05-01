@@ -1,11 +1,9 @@
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
-  // Get both purple buttons
-  const buttons = document.querySelectorAll('button[class*="bg-purple-600"]');
-  
-  // Add click handler for Extract Provider Info button (first purple button)
-  const extractButton = buttons[0];
+  // Get buttons by ID
+  const extractButton = document.getElementById('extractProviderInfoBtn');
+  const convertButton = document.getElementById('convertToFacetsBtn');
   if (extractButton) {
     extractButton.addEventListener('click', async function() {
       try {
