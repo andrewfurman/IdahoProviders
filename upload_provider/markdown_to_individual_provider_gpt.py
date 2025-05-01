@@ -108,6 +108,12 @@ def markdown_to_individual_provider_gpt(provider_id: int) -> bool:
     ]
 
     try:
+        # Log the request
+        log.info("Making GPT API request:")
+        log.info("Model: gpt-4.1-mini")
+        log.info("Messages: %s", json.dumps(messages, indent=2))
+        log.info("Tools: %s", json.dumps([provider_update_tool], indent=2))
+
         completion = client.chat.completions.create(
             model="gpt-4.1-mini",            # supports function calling
             messages=messages,
@@ -115,6 +121,10 @@ def markdown_to_individual_provider_gpt(provider_id: int) -> bool:
             tool_choice="auto",
             parallel_tool_calls=False,
         )
+
+        # Log the response
+        log.info("GPT API response:")
+        log.info("Response: %s", completion.model_dump_json(indent=2))
     except Exception:
         log.exception("✖ OpenAI call failed (provider %s)", provider_id)
         return False
