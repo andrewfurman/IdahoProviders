@@ -109,7 +109,7 @@
                         
                         <div>
                             <label class="text-gray-600 text-sm">Provider Facets Tables</label>
-                            <pre class="mt-2 p-4 rounded border bg-gray-50 max-h-96 overflow-y-auto overflow-x-auto"><code class="language-json hljs">{{ provider.provider_facets_tables }}</code></pre>
+                            <pre class="mt-2 p-4 rounded border bg-gray-50 max-h-96 overflow-y-auto overflow-x-auto"><code class="language-json hljs">{{ provider.provider_facets_tables | tojson(indent=2) }}</code></pre>
                         </div>
                         
                         <div>
