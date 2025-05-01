@@ -22,7 +22,7 @@ def generate_markdown_tables():
     markdown = []
     
     # Networks table
-    markdown.append("## Networks\n")
+    markdown.append("## networks\n")
     markdown.append("| ID | Code | Name |")
     markdown.append("|-----|------|------|")
     for network in networks:
@@ -30,7 +30,7 @@ def generate_markdown_tables():
     markdown.append("\n")
     
     # Hospitals table
-    markdown.append("## Hospitals\n") 
+    markdown.append("## hospitals\n") 
     markdown.append("| ID | Name |")
     markdown.append("|-----|------|")
     for hospital in hospitals:
@@ -38,7 +38,7 @@ def generate_markdown_tables():
     markdown.append("\n")
     
     # Medical Groups table
-    markdown.append("## Medical Groups\n")
+    markdown.append("## medical_groups\n")
     markdown.append("| ID | Name | Address |")
     markdown.append("|-----|------|---------|")
     for group in medical_groups:
@@ -46,7 +46,7 @@ def generate_markdown_tables():
     markdown.append("\n")
     
     # Hospital-Network relationships
-    markdown.append("## Hospital-Network Relationships\n")
+    markdown.append("## hospital_network\n")
     markdown.append("| Hospital ID | Network ID |")
     markdown.append("|------------|------------|")
     hospital_networks = db.session.query(HospitalNetwork).all()
@@ -55,7 +55,7 @@ def generate_markdown_tables():
     markdown.append("\n")
     
     # Medical Group-Hospital relationships
-    markdown.append("## Medical Group-Hospital Relationships\n")
+    markdown.append("## group_hospital\n")
     markdown.append("| Medical Group ID | Hospital ID |")
     markdown.append("|-----------------|-------------|")
     group_hospitals = db.session.query(GroupHospital).all()
