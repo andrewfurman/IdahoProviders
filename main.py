@@ -63,11 +63,13 @@ from providers.providers_routes import providers_bp
 from auth import bp as auth_bp
 from work_queues.work_queue_routes import wq_bp
 from upload_provider.upload_provider_routes import upload_provider_bp
+from enrollment_qa.enrollment_routes import enrollment_bp
 
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(providers_bp)
 app.register_blueprint(wq_bp)
 app.register_blueprint(upload_provider_bp)
+app.register_blueprint(enrollment_bp)
 
 @app.route("/")
 def index():
