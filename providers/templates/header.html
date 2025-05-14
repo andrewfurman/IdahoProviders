@@ -19,6 +19,10 @@
                     <a href="{{ url_for('providers.networks') }}" class="text-white hover:text-blue-200">🌐 Ntwk</a>
                 </div>
                 <div class="border-l border-white-200 h-6"></div>
+                <div class="flex space-x-6">
+                    <a href="{{ url_for('enrollment.enrollment_files') }}" class="text-white hover:text-blue-200">📋 Enrollment</a>
+                </div>
+                <div class="border-l border-white-200 h-6"></div>
                 <a href="{{ url_for('work_queue.work_queue') }}" class="text-white hover:text-blue-200">⚠️ Queue</a>
                 <a href="{{ url_for('upload_provider.upload') }}" class="text-white hover:text-blue-200">📨 Upload</a>
                 {% if current_user.is_authenticated %}
