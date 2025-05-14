@@ -49,6 +49,9 @@ def upload():                       # GET  /upload/
 # ───────────────────────────── Image → Markdown ──────────────────────────
 @upload_provider_bp.post("/process")
 def process_image():                # POST /upload/process
+    # Increase request timeout for this route
+    current_app.config['TIMEOUT'] = 120
+    
     uploaded_file = request.files.get("image_file")
     if not uploaded_file:
         return jsonify(success=False, error="No file provided"), 400
