@@ -156,6 +156,43 @@ def create_tables():
             )
         """)
 
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS enrollment_files (
+                id SERIAL PRIMARY KEY,
+                received_date TEXT,
+                file_name TEXT,
+                status TEXT,
+                error_message TEXT,
+                source_system TEXT,
+                file_type TEXT,
+                update_date TEXT,
+                updated_by_user INTEGER REFERENCES users(id)
+            )
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS members (
+                member_id SERIAL PRIMARY KEY,
+                policyholder_id INTEGER REFERENCES members(member_id),
+                relationship TEXT,
+                ssn TEXT,
+                date_of_birth TEXT,
+                address_line1 TEXT,
+                address_line2 TEXT,
+                city TEXT,
+                state TEXT,
+                zip TEXT,
+                pcp_id INTEGER REFERENCES individual_providers(provider_id),
+                eligibility_status TEXT,
+                eligibility_start TIMESTAMP,
+                eligibility_end TIMESTAMP,
+                plan_id TEXT,
+                source_enrollment_file_id INTEGER REFERENCES enrollment_files(id) ON DELETE CASCADE,
+                update_date TEXT,
+                updated_by_user INTEGER REFERENCES users(id)
+            )
+        """)
+
         print("All tables created successfully!")
 
     except Exception as e:
